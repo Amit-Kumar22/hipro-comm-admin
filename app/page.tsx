@@ -45,18 +45,16 @@ export default function AdminDashboard() {
           ))
         ) : (
           dashboardStats && [
-            { label: 'Total Users', value: dashboardStats.totalUsers ?? 0, icon: '👥', color: 'blue' },
-            { label: 'Products', value: dashboardStats.totalProducts ?? 0, icon: '📦', color: 'green' },
-            { label: 'Total Revenue', value: dashboardStats.totalRevenue ?? 0, icon: '💰', color: 'purple' },
-            { label: 'Orders', value: dashboardStats.totalOrders ?? 0, icon: '📋', color: 'orange' },
+            { label: 'Total Users', value: dashboardStats.overview?.totalUsers || 0, icon: '👥', color: 'blue' },
+            { label: 'Products', value: dashboardStats.overview?.totalProducts || 0, icon: '📦', color: 'green' },
+            { label: 'Categories', value: dashboardStats.overview?.totalCategories || 0, icon: '📂', color: 'purple' },
+            { label: 'Orders', value: dashboardStats.overview?.totalOrders || 0, icon: '📋', color: 'orange' },
           ].map((stat) => (
             <div key={stat.label} className="bg-white p-4 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-gray-600 mb-1">{stat.label}</p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    {typeof stat.value === 'number' ? stat.value.toLocaleString() : '0'}
-                  </p>
+                  <p className="text-lg font-semibold text-gray-900">{(stat.value || 0).toLocaleString()}</p>
                 </div>
                 <span className="text-lg">{stat.icon}</span>
               </div>
@@ -66,53 +64,39 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent Growth Stats */}
-      {dashboardStats && (
+      {dashboardStats && dashboardStats.overview && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white p-4 rounded-lg shadow-sm border">
             <h3 className="text-sm font-medium text-gray-900 mb-3">Recent Activity (30 days)</h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Monthly Growth - Users</span>
+                <span className="text-sm text-gray-600">Recent Products</span>
                 <span className="text-sm font-medium text-green-600">
-                  +{dashboardStats.monthlyGrowth?.users ?? 0}%
+                  {dashboardStats.overview.recentProducts || 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Monthly Growth - Orders</span>
+                <span className="text-sm text-gray-600">Recent Users</span>
                 <span className="text-sm font-medium text-blue-600">
-                  +{dashboardStats.monthlyGrowth?.orders ?? 0}%
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Monthly Growth - Revenue</span>
-                <span className="text-sm font-medium text-purple-600">
-                  +{dashboardStats.monthlyGrowth?.revenue ?? 0}%
+                  {dashboardStats.overview.recentUsers || 0}
                 </span>
               </div>
             </div>
           </div>
 
           <div className="bg-white p-4 rounded-lg shadow-sm border">
-            <h3 className="text-sm font-medium text-gray-900 mb-3">Order Summary</h3>
+            <h3 className="text-sm font-medium text-gray-900 mb-3">Top Categories</h3>
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Pending Orders</span>
-                <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
-                  {dashboardStats.pendingOrders ?? 0}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Recent Orders</span>
-                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                  {dashboardStats.recentOrders ?? 0}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Active Users</span>
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                  {dashboardStats.activeUsers ?? 0}
-                </span>
-              </div>
+              {dashboardStats.topCategories?.slice(0, 3).map((category, index) => (
+                <div key={category.slug} className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">{category.name}</span>
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                    {category.productCount} products
+                  </span>
+                </div>
+              )) || (
+                <p className="text-sm text-gray-500">No categories found</p>
+              )}
             </div>
           </div>
         </div>
@@ -144,7 +128,7 @@ export default function AdminDashboard() {
                     <span className="text-xs">
                       {activity.type === 'user' ? '👤' : 
                        activity.type === 'order' ? '📋' : 
-                       activity.type === 'product' ? '�' : '⚙️'}
+                       activity.type === 'product' ? '📦' : '⚙️'}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">

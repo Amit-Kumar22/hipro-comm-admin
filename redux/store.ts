@@ -4,6 +4,7 @@ import adminProductsReducer from './slices/adminProductsSlice';
 import adminCategoriesReducer from './slices/adminCategoriesSlice';
 import inventoryReducer from './slices/inventorySlice';
 import orderInventoryReducer from './slices/orderInventorySlice';
+import adminOrdersReducer from './slices/adminOrdersSlice';
 import adminReducer from './slices/adminSlice';
 
 export const store = configureStore({
@@ -13,6 +14,7 @@ export const store = configureStore({
     adminCategories: adminCategoriesReducer,
     inventory: inventoryReducer,
     orderInventory: orderInventoryReducer,
+    adminOrders: adminOrdersReducer,
     admin: adminReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',

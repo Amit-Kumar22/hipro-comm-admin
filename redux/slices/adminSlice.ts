@@ -7,18 +7,19 @@ import { API_BASE_URL, getAdminAuthHeaders } from '../config/api.config';
  * Admin Dashboard Types
  */
 export interface DashboardStats {
-  totalUsers: number;
-  totalOrders: number;
-  totalProducts: number;
-  totalRevenue: number;
-  pendingOrders: number;
-  recentOrders: number;
-  activeUsers: number;
-  monthlyGrowth: {
-    users: number;
-    orders: number;
-    revenue: number;
+  overview: {
+    totalUsers: number;
+    totalProducts: number;
+    totalCategories: number;
+    totalOrders: number;
+    recentProducts: number;
+    recentUsers: number;
   };
+  topCategories: Array<{
+    name: string;
+    slug: string;
+    productCount: number;
+  }>;
 }
 
 export interface RecentActivity {
