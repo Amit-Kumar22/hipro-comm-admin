@@ -29,7 +29,7 @@ export default function AdminLoginForm() {
     
     try {
       const result = await dispatch(loginAdmin({ email, password })).unwrap();
-      router.push('/admin');
+      router.push('/');
     } catch (err) {
       console.error('Admin login failed:', err);
     }

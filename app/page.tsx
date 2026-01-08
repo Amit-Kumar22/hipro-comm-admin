@@ -45,16 +45,18 @@ export default function AdminDashboard() {
           ))
         ) : (
           dashboardStats && [
-            { label: 'Total Users', value: dashboardStats.totalUsers, icon: '👥', color: 'blue' },
-            { label: 'Products', value: dashboardStats.totalProducts, icon: '📦', color: 'green' },
-            { label: 'Total Revenue', value: dashboardStats.totalRevenue, icon: '�', color: 'purple' },
-            { label: 'Orders', value: dashboardStats.totalOrders, icon: '📋', color: 'orange' },
+            { label: 'Total Users', value: dashboardStats.totalUsers ?? 0, icon: '👥', color: 'blue' },
+            { label: 'Products', value: dashboardStats.totalProducts ?? 0, icon: '📦', color: 'green' },
+            { label: 'Total Revenue', value: dashboardStats.totalRevenue ?? 0, icon: '💰', color: 'purple' },
+            { label: 'Orders', value: dashboardStats.totalOrders ?? 0, icon: '📋', color: 'orange' },
           ].map((stat) => (
             <div key={stat.label} className="bg-white p-4 rounded-lg shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-gray-600 mb-1">{stat.label}</p>
-                  <p className="text-lg font-semibold text-gray-900">{stat.value.toLocaleString()}</p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {typeof stat.value === 'number' ? stat.value.toLocaleString() : '0'}
+                  </p>
                 </div>
                 <span className="text-lg">{stat.icon}</span>
               </div>
@@ -72,19 +74,19 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Monthly Growth - Users</span>
                 <span className="text-sm font-medium text-green-600">
-                  +{dashboardStats.monthlyGrowth.users}%
+                  +{dashboardStats.monthlyGrowth?.users ?? 0}%
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Monthly Growth - Orders</span>
                 <span className="text-sm font-medium text-blue-600">
-                  +{dashboardStats.monthlyGrowth.orders}%
+                  +{dashboardStats.monthlyGrowth?.orders ?? 0}%
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Monthly Growth - Revenue</span>
                 <span className="text-sm font-medium text-purple-600">
-                  +{dashboardStats.monthlyGrowth.revenue}%
+                  +{dashboardStats.monthlyGrowth?.revenue ?? 0}%
                 </span>
               </div>
             </div>
@@ -96,19 +98,19 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Pending Orders</span>
                 <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
-                  {dashboardStats.pendingOrders}
+                  {dashboardStats.pendingOrders ?? 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Recent Orders</span>
                 <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                  {dashboardStats.recentOrders}
+                  {dashboardStats.recentOrders ?? 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Active Users</span>
                 <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                  {dashboardStats.activeUsers}
+                  {dashboardStats.activeUsers ?? 0}
                 </span>
               </div>
             </div>

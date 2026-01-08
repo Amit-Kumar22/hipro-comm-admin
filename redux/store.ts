@@ -2,6 +2,8 @@ import { configureStore } from '@reduxjs/toolkit';
 import adminAuthReducer from './slices/adminAuthSlice';
 import adminProductsReducer from './slices/adminProductsSlice';
 import adminCategoriesReducer from './slices/adminCategoriesSlice';
+import inventoryReducer from './slices/inventorySlice';
+import orderInventoryReducer from './slices/orderInventorySlice';
 import adminReducer from './slices/adminSlice';
 
 export const store = configureStore({
@@ -9,6 +11,8 @@ export const store = configureStore({
     adminAuth: adminAuthReducer,
     adminProducts: adminProductsReducer,
     adminCategories: adminCategoriesReducer,
+    inventory: inventoryReducer,
+    orderInventory: orderInventoryReducer,
     admin: adminReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',

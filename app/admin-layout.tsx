@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/redux/hooks';
 import { logoutAdmin, clearAdminCredentials } from '@/redux/slices/adminAuthSlice';
+import InventorySyncService from '@/components/services/InventorySyncService';
+import InventoryStatusIndicator from '@/components/ui/InventoryStatusIndicator';
+import NotificationSystem from '@/components/services/NotificationSystem';
 import Link from 'next/link';
 
 export default function AdminLayout({
@@ -72,8 +75,9 @@ export default function AdminLayout({
     { name: 'Dashboard', href: '/', icon: '📊' },
     { name: 'Users', href: '/users', icon: '👥' },
     { name: 'Products', href: '/products', icon: '📦' },
-    { name: 'Categories', href: '/categories', icon: '��' },
-    { name: 'Orders', href: '/orders', icon: '📋' },
+    { name: 'Categories', href: '/categories', icon: '📂' },
+    { name: 'Stock', href: '/stock', icon: '📋' },
+    { name: 'Orders', href: '/orders', icon: '🛒' },
     { name: 'System', href: '/system', icon: '⚙️' },
   ];
 
@@ -148,8 +152,16 @@ export default function AdminLayout({
 
       {/* Main Content */}
       <main className="p-4 lg:p-6">
-        {children}
+        <InventorySyncService>
+          {children}
+        </InventorySyncService>
       </main>
+      
+      {/* Inventory Status Indicator */}
+      <InventoryStatusIndicator />
+      
+      {/* Notification System */}
+      <NotificationSystem />
     </div>
   );
 }

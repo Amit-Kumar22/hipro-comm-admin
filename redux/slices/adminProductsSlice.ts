@@ -159,7 +159,7 @@ export const getAdminProduct = createAsyncThunk(
 // Admin Create Product
 export const createAdminProduct = createAsyncThunk(
   'adminProducts/createProduct',
-  async (productData: Omit<AdminProduct, '_id' | 'createdAt' | 'updatedAt'>, { rejectWithValue }) => {
+  async (productData: any, { rejectWithValue }) => {
     try {
       const response = await axios.post(
         `${API_BASE_URL}/products`,
@@ -168,8 +168,12 @@ export const createAdminProduct = createAsyncThunk(
       );
       return response.data.data;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Failed to create product';
-      return rejectWithValue(errorMessage);
+      // Return detailed error information
+      const errorResponse = {
+        message: error.response?.data?.error || error.response?.data?.message || 'Failed to create product',
+        details: error.response?.data?.details || null
+      };
+      return rejectWithValue(errorResponse);
     }
   }
 );
@@ -179,7 +183,7 @@ export const updateAdminProduct = createAsyncThunk(
   'adminProducts/updateProduct',
   async ({ productId, productData }: { 
     productId: string; 
-    productData: Partial<AdminProduct> 
+    productData: any 
   }, { rejectWithValue }) => {
     try {
       const response = await axios.put(
@@ -189,8 +193,12 @@ export const updateAdminProduct = createAsyncThunk(
       );
       return response.data.data;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Failed to update product';
-      return rejectWithValue(errorMessage);
+      // Return detailed error information
+      const errorResponse = {
+        message: error.response?.data?.error || error.response?.data?.message || 'Failed to update product',
+        details: error.response?.data?.details || null
+      };
+      return rejectWithValue(errorResponse);
     }
   }
 );

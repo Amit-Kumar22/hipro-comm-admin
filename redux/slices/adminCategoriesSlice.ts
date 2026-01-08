@@ -111,8 +111,12 @@ export const createAdminCategory = createAsyncThunk(
       );
       return response.data.data;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Failed to create category';
-      return rejectWithValue(errorMessage);
+      // Return detailed error information
+      const errorResponse = {
+        message: error.response?.data?.error || error.response?.data?.message || 'Failed to create category',
+        details: error.response?.data?.details || null
+      };
+      return rejectWithValue(errorResponse);
     }
   }
 );
@@ -132,8 +136,12 @@ export const updateAdminCategory = createAsyncThunk(
       );
       return response.data.data;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Failed to update category';
-      return rejectWithValue(errorMessage);
+      // Return detailed error information
+      const errorResponse = {
+        message: error.response?.data?.error || error.response?.data?.message || 'Failed to update category',
+        details: error.response?.data?.details || null
+      };
+      return rejectWithValue(errorResponse);
     }
   }
 );
