@@ -93,9 +93,16 @@ export default function CategoryModal({ isOpen, onClose, category, onSuccess }: 
       onClose();
     } catch (error: any) {
       console.error('Error saving category:', error);
-      const errorMessage = error?.details 
-        ? error.details.map((d: any) => `${d.field}: ${d.message}`).join(', ')
-        : error?.message || 'Failed to save category. Please try again.';
+      let errorMessage = 'Failed to save category. Please try again.';
+      
+      if (error?.details && Array.isArray(error.details)) {
+        errorMessage = error.details.map((d: any) => `${d.field}: ${d.message}`).join(', ');
+      } else if (error?.message && typeof error.message === 'string') {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
       showError(errorMessage);
     }
   };

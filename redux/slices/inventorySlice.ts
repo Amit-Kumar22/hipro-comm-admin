@@ -66,6 +66,10 @@ interface InventoryState {
   stats: InventoryStats | null;
   loading: boolean;
   error: string | null;
+  syncStatus: {
+    lastSyncTime?: string;
+    message?: string;
+  } | null;
   pagination: {
     totalCount: number;
     totalPages: number;
@@ -90,6 +94,7 @@ const initialState: InventoryState = {
   stats: null,
   loading: false,
   error: null,
+  syncStatus: null,
   pagination: {
     totalCount: 0,
     totalPages: 0,
@@ -269,6 +274,27 @@ export const bulkUpdateInventory = createAsyncThunk(
     } catch (error: any) {
       const errorResponse = {
         message: error.response?.data?.error || error.response?.data?.message || 'Failed to bulk update inventory',
+        details: error.response?.data?.details || null
+      };
+      return rejectWithValue(errorResponse);
+    }
+  }
+);
+
+// Sync Inventory with Product Stock Levels
+export const syncInventory = createAsyncThunk(
+  'inventory/syncInventory',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/inventory/sync`,
+        {},
+        { headers: getAdminAuthHeaders() }
+      );
+      return response.data.data;
+    } catch (error: any) {
+      const errorResponse = {
+        message: error.response?.data?.error || error.response?.data?.message || 'Failed to sync inventory',
         details: error.response?.data?.details || null
       };
       return rejectWithValue(errorResponse);
@@ -465,6 +491,24 @@ const inventorySlice = createSlice({
         });
       })
       .addCase(bulkUpdateInventory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
+      // Sync Inventory
+      .addCase(syncInventory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(syncInventory.fulfilled, (state, action) => {
+        state.loading = false;
+        // Successfully synced - refresh the inventory list
+        state.syncStatus = {
+          lastSyncTime: new Date().toISOString(),
+          message: action.payload?.message || 'Inventory synced successfully'
+        };
+      })
+      .addCase(syncInventory.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })

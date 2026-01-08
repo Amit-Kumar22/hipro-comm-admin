@@ -1,20 +1,38 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { 
   getInventory, 
-  getInventoryStats, 
+  getInventoryStats,
   getLowStockItems,
   adjustStock,
   updateInventory,
   setFilters,
-  clearError 
+  clearError,
+  syncInventory
 } from '@/redux/slices/inventorySlice';
-import { syncOrdersWithInventory } from '@/redux/slices/orderInventorySlice';
 import { useToast } from '@/components/providers/ToastProvider';
+import StockSyncStatus from '@/components/inventory/StockSyncStatus';
 import StockAdjustmentModal from '@/components/modals/StockAdjustmentModal';
 import InventoryEditModal from '@/components/modals/InventoryEditModal';
+
+// Debounce hook
+function useDebounce(value: any, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 export default function StockPage() {
   const dispatch = useAppDispatch();
@@ -25,68 +43,125 @@ export default function StockPage() {
     loading, 
     error, 
     pagination, 
-    filters 
+    filters,
+    syncStatus 
   } = useAppSelector((state) => state.inventory);
-  const { lastSyncTime, loading: syncLoading } = useAppSelector((state) => state.orderInventory);
 
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [isAdjustmentModalOpen, setIsAdjustmentModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [localFilters, setLocalFilters] = useState(filters);
 
+  // Debounce search term and filters to reduce API calls
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const debouncedFilters = useDebounce(localFilters, 300);
+
+  // Initial load - only call once when component mounts
   useEffect(() => {
-    dispatch(getInventory({}));
-    dispatch(getInventoryStats());
+    const loadInitialData = async () => {
+      try {
+        await dispatch(getInventory({}));
+        await dispatch(getInventoryStats());
+      } catch (error) {
+        console.error('Failed to load initial data:', error);
+      }
+    };
+
+    loadInitialData();
   }, [dispatch]);
 
+  // Handle debounced search and filters
+  useEffect(() => {
+    if (debouncedSearchTerm !== '' || Object.keys(debouncedFilters).length > 0) {
+      const searchFilters = {
+        ...debouncedFilters,
+        ...(debouncedSearchTerm && { search: debouncedSearchTerm })
+      };
+      
+      dispatch(setFilters(searchFilters));
+      dispatch(getInventory({ ...searchFilters, page: 1 }));
+    }
+  }, [debouncedSearchTerm, debouncedFilters, dispatch]);
+
+  // Error handling with improved logic
   useEffect(() => {
     if (error) {
-      showError(error);
+      let errorMessage = 'An error occurred';
+      
+      if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        if ('message' in error) {
+          errorMessage = (error as any).message;
+        } else if ('error' in error) {
+          errorMessage = (error as any).error;
+        }
+      }
+      
+      // Handle rate limit error specifically
+      if (errorMessage.includes('Too many requests')) {
+        showError('Rate limit exceeded. Please wait a moment before trying again.');
+      } else {
+        showError(errorMessage);
+      }
+      
       dispatch(clearError());
     }
   }, [error, showError, dispatch]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(setFilters({ search: searchTerm }));
-    dispatch(getInventory({ ...filters, search: searchTerm, page: 1 }));
+    // The actual search is handled by the debounced effect
+    // This just prevents form submission
   };
 
-  const handleFilterChange = (filterName: string, value: any) => {
-    const newFilters = { ...filters, [filterName]: value };
-    dispatch(setFilters(newFilters));
-    dispatch(getInventory({ ...newFilters, page: 1 }));
-  };
+  const handleFilterChange = useCallback((filterName: string, value: any) => {
+    setLocalFilters(prev => ({ ...prev, [filterName]: value }));
+  }, []);
 
-  const handlePageChange = (page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     dispatch(getInventory({ ...filters, page }));
-  };
+  }, [dispatch, filters]);
 
-  const handleManualSync = async () => {
+  // Throttled manual sync to prevent spam clicking
+  const handleManualSync = useCallback(async () => {
+    if (loading) return; // Prevent multiple simultaneous syncs
+    
     try {
-      await dispatch(syncOrdersWithInventory()).unwrap();
-      showSuccess('Manual sync completed - checking for stock updates...');
-      // Refresh inventory after sync
+      await dispatch(syncInventory()).unwrap();
+      showSuccess('Inventory sync completed successfully!');
+      
+      // Refresh data after successful sync
       setTimeout(() => {
-        dispatch(getInventory({ ...filters }));
-        dispatch(getInventoryStats());
+        Promise.all([
+          dispatch(getInventory({ ...filters })),
+          dispatch(getInventoryStats())
+        ]).catch(error => {
+          console.error('Failed to refresh after sync:', error);
+        });
       }, 1000);
     } catch (error: any) {
-      showError('Manual sync failed: ' + (error.message || 'Unknown error'));
+      const errorMessage = error?.message || 'Inventory sync failed';
+      if (errorMessage.includes('Too many requests')) {
+        showError('Rate limit exceeded. Please wait before syncing again.');
+      } else {
+        showError(`Inventory sync failed: ${errorMessage}`);
+      }
     }
-  };
+  }, [dispatch, filters, showSuccess, showError, loading]);
 
-  const openAdjustmentModal = (item: any) => {
+  const openAdjustmentModal = useCallback((item: any) => {
     setSelectedItem(item);
     setIsAdjustmentModalOpen(true);
-  };
+  }, []);
 
-  const openEditModal = (item: any) => {
+  const openEditModal = useCallback((item: any) => {
     setSelectedItem(item);
     setIsEditModalOpen(true);
-  };
+  }, []);
 
-  const handleStockAdjustment = async (adjustment: number, reason: string, notes?: string) => {
+  const handleStockAdjustment = useCallback(async (adjustment: number, reason: string, notes?: string) => {
     if (!selectedItem) return;
     
     try {
@@ -101,18 +176,29 @@ export default function StockPage() {
       setIsAdjustmentModalOpen(false);
       setSelectedItem(null);
       
-      // Refresh data
-      dispatch(getInventory({ ...filters }));
-      dispatch(getInventoryStats());
+      // Only refresh current page data to avoid excessive API calls
+      setTimeout(() => {
+        dispatch(getInventory({ ...filters, page: pagination?.currentPage || 1 }));
+      }, 500);
+      
     } catch (error: any) {
-      const errorMessage = error?.details 
-        ? error.details.map((d: any) => `${d.field}: ${d.message}`).join(', ')
-        : error?.message || 'Failed to adjust stock';
-      showError(errorMessage);
+      let errorMessage = 'Failed to adjust stock';
+      
+      if (error?.details && Array.isArray(error.details)) {
+        errorMessage = error.details.map((d: any) => `${d.field}: ${d.message}`).join(', ');
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      if (errorMessage.includes('Too many requests')) {
+        showError('Rate limit exceeded. Please wait before making changes.');
+      } else {
+        showError(errorMessage);
+      }
     }
-  };
+  }, [selectedItem, dispatch, showSuccess, showError, filters, pagination]);
 
-  const handleInventoryUpdate = async (itemData: any) => {
+  const handleInventoryUpdate = useCallback(async (itemData: any) => {
     if (!selectedItem) return;
     
     try {
@@ -125,16 +211,42 @@ export default function StockPage() {
       setIsEditModalOpen(false);
       setSelectedItem(null);
       
-      // Refresh data
-      dispatch(getInventory({ ...filters }));
-      dispatch(getInventoryStats());
+      // Only refresh current page data to avoid excessive API calls
+      setTimeout(() => {
+        dispatch(getInventory({ ...filters, page: pagination?.currentPage || 1 }));
+      }, 500);
+      
     } catch (error: any) {
-      const errorMessage = error?.details 
-        ? error.details.map((d: any) => `${d.field}: ${d.message}`).join(', ')
-        : error?.message || 'Failed to update inventory';
-      showError(errorMessage);
+      let errorMessage = 'Failed to update inventory';
+      
+      if (error?.details && Array.isArray(error.details)) {
+        errorMessage = error.details.map((d: any) => `${d.field}: ${d.message}`).join(', ');
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      if (errorMessage.includes('Too many requests')) {
+        showError('Rate limit exceeded. Please wait before making changes.');
+      } else {
+        showError(errorMessage);
+      }
     }
-  };
+  }, [selectedItem, dispatch, showSuccess, showError, filters, pagination]);
+
+  // Throttled low stock items function
+  const handleGetLowStockItems = useCallback(async () => {
+    try {
+      await dispatch(getLowStockItems());
+      showSuccess('Low stock items loaded successfully');
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to load low stock items';
+      if (errorMessage.includes('Too many requests')) {
+        showError('Rate limit exceeded. Please wait before trying again.');
+      } else {
+        showError(errorMessage);
+      }
+    }
+  }, [dispatch, showSuccess, showError]);
 
   const getStockStatus = (item: any) => {
     if (item.isOutOfStock) {
@@ -152,27 +264,23 @@ export default function StockPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Stock Management</h1>
-          <div className="flex items-center space-x-4 mt-1">
+          <div className="flex items-center space-x-6 mt-2">
             <p className="text-sm text-gray-600">Manage inventory levels and stock adjustments</p>
-            {lastSyncTime && (
-              <div className="flex items-center space-x-2 text-xs text-gray-500">
-                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                <span>Last sync: {new Date(lastSyncTime).toLocaleTimeString()}</span>
-              </div>
-            )}
+            <StockSyncStatus />
           </div>
         </div>
         <div className="flex space-x-2">
           <button
             onClick={handleManualSync}
-            disabled={syncLoading}
+            disabled={loading}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {syncLoading ? 'Syncing...' : 'Manual Sync'}
+            {loading ? 'Syncing...' : 'Sync Inventory'}
           </button>
           <button
-            onClick={() => dispatch(getLowStockItems())}
-            className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm"
+            onClick={handleGetLowStockItems}
+            disabled={loading}
+            className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm disabled:opacity-50"
           >
             View Low Stock Items
           </button>
@@ -209,7 +317,7 @@ export default function StockPage() {
         </div>
       )}
 
-      {/* Search and Filters */}
+      {/* Search and Filters - Optimized with debouncing */}
       <div className="bg-white p-4 rounded-lg shadow-sm border">
         <div className="flex flex-col md:flex-row gap-4">
           <form onSubmit={handleSearch} className="flex-1 flex gap-2">
@@ -217,12 +325,13 @@ export default function StockPage() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search products by name or SKU..."
+              placeholder="Search products by name or SKU... (auto-search after typing)"
               className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             <button
               type="submit"
-              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm"
+              disabled={loading}
+              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm disabled:opacity-50"
             >
               Search
             </button>
@@ -232,7 +341,7 @@ export default function StockPage() {
             <label className="flex items-center text-sm">
               <input
                 type="checkbox"
-                checked={filters.lowStock}
+                checked={localFilters.lowStock || false}
                 onChange={(e) => handleFilterChange('lowStock', e.target.checked)}
                 className="mr-2 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
               />
@@ -242,7 +351,7 @@ export default function StockPage() {
             <label className="flex items-center text-sm">
               <input
                 type="checkbox"
-                checked={filters.outOfStock}
+                checked={localFilters.outOfStock || false}
                 onChange={(e) => handleFilterChange('outOfStock', e.target.checked)}
                 className="mr-2 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
               />
@@ -250,6 +359,14 @@ export default function StockPage() {
             </label>
           </div>
         </div>
+        
+        {/* Search indicator */}
+        {searchTerm !== debouncedSearchTerm && (
+          <div className="mt-2 text-xs text-gray-500 flex items-center">
+            <div className="animate-pulse w-2 h-2 bg-orange-400 rounded-full mr-2"></div>
+            Searching...
+          </div>
+        )}
       </div>
 
       {/* Inventory Table */}

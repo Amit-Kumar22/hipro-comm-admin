@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import { fetchAllOrders, updateOrderStatus } from '../../redux/slices/adminOrdersSlice';
@@ -12,6 +12,11 @@ export default function OrdersTable() {
   );
 
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [trackingModal, setTrackingModal] = useState<{ isOpen: boolean; order: any | null }>({
+    isOpen: false,
+    order: null
+  });
 
   useEffect(() => {
     dispatch(fetchAllOrders({ page: 1, limit: 20, ...filters }));
@@ -28,21 +33,37 @@ export default function OrdersTable() {
 
   const getStatusBadge = (status: string) => {
     const colors = {
-      PENDING: 'bg-yellow-200 text-yellow-900 border-yellow-300',
-      PAID: 'bg-blue-200 text-blue-900 border-blue-300',
-      SHIPPED: 'bg-purple-200 text-purple-900 border-purple-300',
-      DELIVERED: 'bg-green-200 text-green-900 border-green-300',
-      CANCELLED: 'bg-red-200 text-red-900 border-red-300',
+      PENDING: 'bg-orange-100 text-orange-800',
+      PAID: 'bg-blue-100 text-blue-800',
+      SHIPPED: 'bg-purple-100 text-purple-800',
+      DELIVERED: 'bg-green-100 text-green-800',
+      CANCELLED: 'bg-red-100 text-red-800',
     };
-    return colors[status as keyof typeof colors] || 'bg-gray-200 text-gray-900 border-gray-300';
+    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getPaymentBadge = (method: string, status: string) => {
+    if (method === 'cod') {
+      return status === 'PAID' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+    }
+    return status === 'PAID' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800';
+  };
+
+  const checkStockStatus = (items: any[]) => {
+    // Mock stock check - integrate with actual inventory system
+    const lowStockItems = items.filter(item => {
+      // Assuming we have stock info in product data
+      return item.product?.inventory?.available < 5;
+    });
+    return lowStockItems.length > 0;
   };
 
   if (loading && orders.length === 0) {
     return (
-      <div className="bg-white rounded border p-4">
+      <div className="bg-white rounded-lg shadow-sm border p-3">
         <div className="animate-pulse space-y-2">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-8 bg-gray-200 rounded"></div>
+            <div key={i} className="h-12 bg-gray-200 rounded"></div>
           ))}
         </div>
       </div>
@@ -51,10 +72,10 @@ export default function OrdersTable() {
 
   if (!loading && orders.length === 0) {
     return (
-      <div className="bg-white rounded border p-8 text-center">
-        <div className="text-3xl mb-3">📋</div>
-        <h3 className="text-sm font-medium text-gray-900 mb-1">No Orders Found</h3>
-        <p className="text-xs text-gray-600">
+      <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
+        <div className="text-4xl mb-2">�</div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-1">No Orders Found</h3>
+        <p className="text-sm text-gray-600">
           {Object.keys(filters).length > 0 
             ? 'No orders match your current filters.' 
             : 'No orders have been placed yet.'}
@@ -64,133 +85,404 @@ export default function OrdersTable() {
   }
 
   return (
-    <div className="bg-white rounded border overflow-hidden">
-      {/* Header */}
-      <div className="px-3 py-2 border-b bg-gray-50 flex justify-between items-center">
-        <h3 className="text-sm font-medium">Orders ({pagination?.total || 0})</h3>
-        {selectedOrders.length > 0 && (
-          <span className="text-xs text-gray-500">{selectedOrders.length} selected</span>
-        )}
+    <div className="bg-white rounded-lg shadow border overflow-hidden">
+      {/* Compact Header */}
+      <div className="px-3 py-2 border-b bg-gray-800">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-sm font-bold text-white">
+              Orders ({pagination?.total || 0})
+            </h3>
+          </div>
+          {selectedOrders.length > 0 && (
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-white bg-blue-600 px-2 py-1 rounded">
+                {selectedOrders.length} selected
+              </span>
+              <button className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                Actions
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Table */}
+      {/* Compact Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full text-xs">
+          <thead className="bg-gray-700">
             <tr>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-2 py-2 text-left text-xs font-semibold text-white">
                 <input
                   type="checkbox"
-                  className="rounded border-gray-300"
+                  className="rounded text-blue-600 w-3 h-3"
                   onChange={(e) =>
                     setSelectedOrders(e.target.checked ? orders.map(o => o._id) : [])
                   }
                 />
               </th>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+              <th className="px-2 py-2 text-left text-xs font-semibold text-white">Order</th>
+              <th className="px-2 py-2 text-left text-xs font-semibold text-white">Customer</th>
+              <th className="px-2 py-2 text-left text-xs font-semibold text-white">Items</th>
+              <th className="px-2 py-2 text-left text-xs font-semibold text-white">Amount</th>
+              <th className="px-2 py-2 text-left text-xs font-semibold text-white w-24">Status</th>
+              <th className="px-2 py-2 text-left text-xs font-semibold text-white">Date</th>
+              <th className="px-2 py-2 text-left text-xs font-semibold text-white">Actions</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {orders.map((order) => (
-              <tr key={order._id} className="hover:bg-gray-50">
-                <td className="px-3 py-2">
-                  <input
-                    type="checkbox"
-                    className="rounded border-gray-300"
-                    checked={selectedOrders.includes(order._id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedOrders([...selectedOrders, order._id]);
-                      } else {
-                        setSelectedOrders(selectedOrders.filter(id => id !== order._id));
-                      }
-                    }}
-                  />
-                </td>
-                <td className="px-3 py-2">
-                  <div className="text-xs">
-                    <div className="font-semibold text-gray-900">{order.orderNumber}</div>
-                    <div className="text-gray-600">#{order._id.slice(-6)}</div>
-                  </div>
-                </td>
-                <td className="px-3 py-2">
-                  <div className="text-xs">
-                    <div className="font-semibold text-gray-900">{order.user?.name || 'N/A'}</div>
-                    <div className="text-gray-700">{order.user?.email || 'N/A'}</div>
-                  </div>
-                </td>
-                <td className="px-3 py-2 text-xs font-medium text-gray-900">
-                  {order.items?.length || 0} items
-                </td>
-                <td className="px-3 py-2">
-                  <div className="text-xs">
-                    <div className="font-bold text-gray-900">₹{order.totals?.total?.toFixed(2) || '0.00'}</div>
-                    <div className="text-gray-700">{order.paymentMethod === 'cod' ? 'COD' : 'Online'}</div>
-                  </div>
-                </td>
-                <td className="px-3 py-2">
-                  <select
-                    value={order.status}
-                    onChange={(e) => handleStatusUpdate(order._id, e.target.value)}
-                    disabled={updating}
-                    className="text-xs border-0 bg-transparent focus:ring-0 cursor-pointer"
-                  >
-                    <option value="PENDING">Pending</option>
-                    <option value="PAID">Paid</option>
-                    <option value="SHIPPED">Shipped</option>
-                    <option value="DELIVERED">Delivered</option>
-                    <option value="CANCELLED">Cancelled</option>
-                  </select>
-                  <div className="mt-1">
-                    <span className={`inline-flex px-2 py-0.5 rounded border text-xs font-semibold ${getStatusBadge(order.status)}`}>
-                      {order.status}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-3 py-2 text-xs font-medium text-gray-900">
-                  {new Date(order.createdAt).toLocaleDateString('en-IN', {
-                    day: '2-digit',
-                    month: 'short',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </td>
-                <td className="px-3 py-2 text-xs">
-                  <button className="text-blue-700 hover:text-blue-900 font-medium">View</button>
-                </td>
-              </tr>
+          <tbody className="bg-white">
+            {orders.map((order, index) => (
+              <React.Fragment key={order._id}>
+                <tr className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-blue-50`}>
+                  <td className="px-2 py-2">
+                    <input
+                      type="checkbox"
+                      className="rounded text-blue-600 w-3 h-3"
+                      checked={selectedOrders.includes(order._id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedOrders([...selectedOrders, order._id]);
+                        } else {
+                          setSelectedOrders(selectedOrders.filter(id => id !== order._id));
+                        }
+                      }}
+                    />
+                  </td>
+                  <td className="px-2 py-2">
+                    <div className="text-xs">
+                      <div className="font-bold text-gray-900">{order.orderNumber}</div>
+                      <div className="text-gray-600">#{order._id.slice(-6)}</div>
+                      {checkStockStatus(order.items || []) && (
+                        <div className="text-red-600 font-medium">⚠️ Low Stock</div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-2 py-2">
+                    <div className="text-xs">
+                      <div className="font-semibold text-gray-900">{order.user?.name || 'N/A'}</div>
+                      <div className="text-gray-600">{order.user?.email || 'N/A'}</div>
+                    </div>
+                  </td>
+                  <td className="px-2 py-2">
+                    <div className="text-xs">
+                      <div className="font-semibold text-gray-900">
+                        {order.items?.length || 0} items
+                      </div>
+                      <div className="text-gray-600">
+                        Qty: {order.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0}
+                      </div>
+                      {order.items && order.items.length > 0 && (
+                        <button
+                          onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
+                          className="text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          {expandedOrder === order._id ? '▲' : '▼'} View
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-2 py-2">
+                    <div className="text-xs">
+                      <div className="font-bold text-gray-900">₹{order.totals?.total?.toFixed(2) || '0.00'}</div>
+                      <div className={`px-1 py-0.5 rounded text-xs ${getPaymentBadge(order.paymentMethod, order.paymentStatus)}`}>
+                        {order.paymentMethod === 'cod' ? 'COD' : 'Online'}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-2 py-2 w-24">
+                    <div className="space-y-1">
+                      <select
+                        value={order.status}
+                        onChange={(e) => handleStatusUpdate(order._id, e.target.value)}
+                        disabled={updating}
+                        className="w-20 text-xs border border-gray-300 rounded px-1 py-1 bg-white text-gray-900 font-medium focus:border-blue-500"
+                      >
+                        <option value="PENDING">Pending</option>
+                        <option value="PAID">Paid</option>
+                        <option value="SHIPPED">Shipped</option>
+                        <option value="DELIVERED">Delivered</option>
+                        <option value="CANCELLED">Cancelled</option>
+                      </select>
+                      <div>
+                        <span className={`inline-block px-1 py-0.5 rounded text-xs font-medium ${getStatusBadge(order.status)}`}>
+                          {order.status}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-2 py-2 text-xs font-medium text-gray-900">
+                    <div>{new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</div>
+                    <div className="text-gray-600">{new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
+                  </td>
+                  <td className="px-2 py-2">
+                    <div className="flex space-x-1">
+                      <button 
+                        onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
+                        className="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded hover:bg-blue-200"
+                      >
+                        {expandedOrder === order._id ? 'Hide' : 'View'}
+                      </button>
+                      <button 
+                        onClick={() => setTrackingModal({ isOpen: true, order })}
+                        className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded hover:bg-green-200"
+                      >
+                        Track
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                {/* Compact Expanded Order Details */}
+                {expandedOrder === order._id && (
+                  <tr>
+                    <td colSpan={8} className="px-3 py-2 bg-gray-50 border-l-2 border-blue-500">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {/* Order Items */}
+                        <div>
+                          <h5 className="text-xs font-bold text-gray-900 mb-1">Items ({order.items?.length || 0})</h5>
+                          <div className="space-y-1 max-h-32 overflow-y-auto">
+                            {order.items?.map((item: any, index: number) => (
+                              <div key={index} className="flex items-center space-x-2 p-1 bg-white rounded text-xs">
+                                {item.product?.images?.[0] && (
+                                  <img
+                                    src={item.product.images[0].url}
+                                    alt={item.product.images[0].alt}
+                                    className="w-8 h-8 rounded object-cover"
+                                  />
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-medium text-gray-900 truncate">{item.name}</div>
+                                  <div className="text-gray-600">
+                                    {item.sku} | Qty: {item.quantity} | ₹{item.price}
+                                  </div>
+                                  <div className="flex space-x-1">
+                                    <span className={`px-1 py-0.5 rounded text-xs ${
+                                      item.product?.inventory?.available > 10 ? 'bg-green-100 text-green-800' 
+                                      : item.product?.inventory?.available > 0 ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-red-100 text-red-800'
+                                    }`}>
+                                      Stock: {item.product?.inventory?.available || 'N/A'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="text-xs font-bold">₹{item.total}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* Shipping & Actions */}
+                        <div>
+                          <h5 className="text-xs font-bold text-gray-900 mb-1">Shipping & Actions</h5>
+                          <div className="p-2 bg-white rounded text-xs mb-2">
+                            <div>{order.shippingAddress?.street}</div>
+                            <div>{order.shippingAddress?.city}, {order.shippingAddress?.state} {order.shippingAddress?.pincode}</div>
+                            {order.shippingAddress?.phone && <div>📱 {order.shippingAddress.phone}</div>}
+                          </div>
+                          <div className="grid grid-cols-2 gap-1">
+                            <button className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700">
+                              Update Status
+                            </button>
+                            <button className="px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700">
+                              Reserve Stock
+                            </button>
+                            <button className="px-2 py-1 bg-yellow-600 text-white rounded text-xs hover:bg-yellow-700">
+                              Check Inventory
+                            </button>
+                            <button className="px-2 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700">
+                              Invoice
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination */}
+      {/* Compact Pagination */}
       {pagination && pagination.pages > 1 && (
-        <div className="px-3 py-2 border-t bg-gray-50 flex items-center justify-between">
-          <div className="text-xs text-gray-700">
-            Page {pagination.page} of {pagination.pages} • {pagination.total} total
+        <div className="px-3 py-2 border-t bg-gray-50">
+          <div className="flex justify-between items-center">
+            <div className="text-xs text-gray-700">
+              {((pagination.page - 1) * 20) + 1}-{Math.min(pagination.page * 20, pagination.total)} of {pagination.total}
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handlePageChange(pagination.page - 1)}
+                disabled={pagination.page <= 1}
+                className="px-2 py-1 text-xs border rounded hover:bg-gray-100 disabled:opacity-50"
+              >
+                ← Prev
+              </button>
+              <span className="px-2 py-1 text-xs bg-blue-600 text-white rounded">
+                {pagination.page}/{pagination.pages}
+              </span>
+              <button
+                onClick={() => handlePageChange(pagination.page + 1)}
+                disabled={pagination.page >= pagination.pages}
+                className="px-2 py-1 text-xs border rounded hover:bg-gray-100 disabled:opacity-50"
+              >
+                Next →
+              </button>
+            </div>
           </div>
-          <div className="flex space-x-1">
-            <button
-              onClick={() => handlePageChange(pagination.page - 1)}
-              disabled={pagination.page <= 1}
-              className="px-2 py-1 text-xs border rounded hover:bg-gray-100 disabled:opacity-50"
-            >
-              ←
-            </button>
-            <button
-              onClick={() => handlePageChange(pagination.page + 1)}
-              disabled={pagination.page >= pagination.pages}
-              className="px-2 py-1 text-xs border rounded hover:bg-gray-100 disabled:opacity-50"
-            >
-              →
-            </button>
+        </div>
+      )}
+    
+      {/* Professional Tracking Modal */}
+      {trackingModal.isOpen && trackingModal.order && (
+        <div className="fixed inset-0 bg-black/60 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-800 text-white rounded-t-lg">
+              <div>
+                <h3 className="text-sm font-bold">Order Tracking</h3>
+                <p className="text-xs text-gray-300">{trackingModal.order.orderNumber}</p>
+              </div>
+              <button
+                onClick={() => setTrackingModal({ isOpen: false, order: null })}
+                className="text-gray-300 hover:text-white text-lg font-bold"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-4">
+              {/* Order Status */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-gray-600">Current Status</span>
+                  <span className={`px-2 py-1 rounded text-xs font-bold ${getStatusBadge(trackingModal.order.status)}`}>
+                    {trackingModal.order.status}
+                  </span>
+                </div>
+                
+                {/* Status Timeline */}
+                <div className="space-y-2">
+                  {[
+                    { status: 'PENDING', label: 'Order Placed', icon: '📋' },
+                    { status: 'PAID', label: 'Payment Confirmed', icon: '💳' },
+                    { status: 'SHIPPED', label: 'Order Shipped', icon: '🚚' },
+                    { status: 'DELIVERED', label: 'Delivered', icon: '📦' }
+                  ].map((step, index) => {
+                    const isCompleted = ['PAID', 'SHIPPED', 'DELIVERED'].includes(trackingModal.order.status) && 
+                      (step.status === 'PENDING' || 
+                       (step.status === 'PAID' && ['PAID', 'SHIPPED', 'DELIVERED'].includes(trackingModal.order.status)) ||
+                       (step.status === 'SHIPPED' && ['SHIPPED', 'DELIVERED'].includes(trackingModal.order.status)) ||
+                       (step.status === 'DELIVERED' && trackingModal.order.status === 'DELIVERED'));
+                    
+                    const isCurrent = trackingModal.order.status === step.status;
+                    
+                    return (
+                      <div key={step.status} className={`flex items-center space-x-3 p-2 rounded ${
+                        isCurrent ? 'bg-blue-50 border border-blue-200' : 
+                        isCompleted ? 'bg-green-50' : 'bg-gray-50'
+                      }`}>
+                        <span className="text-lg">{step.icon}</span>
+                        <div className="flex-1">
+                          <div className={`text-xs font-medium ${
+                            isCurrent ? 'text-blue-800' : 
+                            isCompleted ? 'text-green-800' : 'text-gray-600'
+                          }`}>
+                            {step.label}
+                          </div>
+                          {isCurrent && (
+                            <div className="text-xs text-blue-600 font-semibold">Current Status</div>
+                          )}
+                        </div>
+                        {isCompleted && <span className="text-green-600 text-sm">✓</span>}
+                        {isCurrent && <span className="text-blue-600 text-sm">●</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Order Details */}
+              <div className="border-t pt-3 space-y-3">
+                <div>
+                  <h4 className="text-xs font-bold text-gray-800 mb-2">Order Information</h4>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-gray-600">Order ID:</span>
+                      <div className="font-semibold">{trackingModal.order._id.slice(-8)}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Total Amount:</span>
+                      <div className="font-bold text-green-600">₹{trackingModal.order.totals?.total?.toFixed(2) || '0.00'}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Payment:</span>
+                      <div className="font-medium">{trackingModal.order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Order Date:</span>
+                      <div className="font-medium">{new Date(trackingModal.order.createdAt).toLocaleDateString('en-IN')}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Shipping Address */}
+                <div>
+                  <h4 className="text-xs font-bold text-gray-800 mb-2">Shipping Address</h4>
+                  <div className="p-2 bg-gray-50 rounded text-xs text-gray-700">
+                    <div className="font-medium">{trackingModal.order.user?.name || 'N/A'}</div>
+                    <div>{trackingModal.order.shippingAddress?.street}</div>
+                    <div>{trackingModal.order.shippingAddress?.city}, {trackingModal.order.shippingAddress?.state} {trackingModal.order.shippingAddress?.pincode}</div>
+                    <div>{trackingModal.order.shippingAddress?.country}</div>
+                    {trackingModal.order.shippingAddress?.phone && (
+                      <div className="mt-1 pt-1 border-t border-gray-300">
+                        📱 {trackingModal.order.shippingAddress.phone}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Items Summary */}
+                <div>
+                  <h4 className="text-xs font-bold text-gray-800 mb-2">Items ({trackingModal.order.items?.length || 0})</h4>
+                  <div className="space-y-1 max-h-24 overflow-y-auto">
+                    {trackingModal.order.items?.map((item: any, index: number) => (
+                      <div key={index} className="flex justify-between items-center p-1 bg-gray-50 rounded text-xs">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900 truncate">{item.name}</div>
+                          <div className="text-gray-600">Qty: {item.quantity}</div>
+                        </div>
+                        <div className="font-bold text-gray-900">₹{item.total}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-4 py-3 border-t bg-gray-50 rounded-b-lg">
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setTrackingModal({ isOpen: false, order: null })}
+                  className="flex-1 px-3 py-2 text-xs font-medium bg-gray-600 text-white rounded hover:bg-gray-700"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    // Copy tracking info to clipboard
+                    const trackingText = `Order: ${trackingModal.order.orderNumber}\nStatus: ${trackingModal.order.status}\nTracking ID: ${trackingModal.order._id}`;
+                    navigator.clipboard.writeText(trackingText);
+                    alert('Tracking info copied to clipboard!');
+                  }}
+                  className="flex-1 px-3 py-2 text-xs font-medium bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Copy Info
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

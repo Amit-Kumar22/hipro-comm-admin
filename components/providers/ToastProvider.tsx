@@ -35,8 +35,15 @@ export function ToastProvider({ children }: ToastProviderProps) {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   const showToast = (message: string, type: ToastType) => {
+    // Safety check to ensure message is always a string
+    const safeMessage = typeof message === 'string' 
+      ? message 
+      : typeof message === 'object' && message !== null 
+        ? JSON.stringify(message) 
+        : String(message);
+        
     const id = Math.random().toString(36).substr(2, 9);
-    setToasts(prev => [...prev, { id, message, type }]);
+    setToasts(prev => [...prev, { id, message: safeMessage, type }]);
   };
 
   const showSuccess = (message: string) => showToast(message, 'success');
