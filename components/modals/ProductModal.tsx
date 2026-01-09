@@ -308,10 +308,14 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
       tags: formData.tags,
       isFeatured: formData.isFeatured,
       isActive: formData.isActive,
-      // Backend expects these inventory fields for new products
-      initialStock: formData.inventory.quantity,
-      reorderLevel: formData.inventory.threshold,
-      maxStockLevel: Math.max(formData.inventory.quantity + 1000, formData.inventory.quantity * 2)
+      // For both new products and updates, send stock quantity
+      ...(product ? {
+        stockQuantity: formData.inventory.quantity // For updates, use stockQuantity
+      } : {
+        initialStock: formData.inventory.quantity, // For new products, use initialStock
+        reorderLevel: formData.inventory.threshold,
+        maxStockLevel: Math.max(formData.inventory.quantity + 1000, formData.inventory.quantity * 2)
+      })
     };
 
     // For updates, inventory will be handled automatically by backend
@@ -324,7 +328,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
           productId: product._id, 
           productData: finalProductData 
         })).unwrap();
-        showSuccess('Product updated successfully! Inventory will sync automatically.');
+        showSuccess('Product updated successfully! Stock and inventory updated automatically.');
       } else {
         result = await dispatch(createAdminProduct(finalProductData)).unwrap();
         if (formData.inventory.quantity === 0) {

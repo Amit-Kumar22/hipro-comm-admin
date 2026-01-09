@@ -24,8 +24,10 @@ export interface DashboardStats {
 
 export interface RecentActivity {
   _id: string;
-  type: 'order' | 'user' | 'product' | 'system';
-  description: string;
+  type: 'order_created' | 'user_registered' | 'product_created' | 'system_update' | string;
+  title: string;
+  subtitle: string;
+  description?: string;
   timestamp: string;
   metadata?: Record<string, any>;
 }
