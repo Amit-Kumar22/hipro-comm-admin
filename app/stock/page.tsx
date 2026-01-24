@@ -290,26 +290,38 @@ export default function StockPage() {
 
   const getStockStatus = (item: any) => {
     if (item.isOutOfStock) {
-      return { text: 'Out of Stock', className: 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700 border-2 border-red-200', icon: <XCircle className="h-3 w-3 mr-1" /> };
+      return { 
+        text: 'Out of Stock', 
+        className: 'bg-red-50 text-red-700 border border-red-200 ring-1 ring-red-200', 
+        icon: <XCircle className="h-3 w-3 mr-1" /> 
+      };
     } else if (item.isLowStock) {
-      return { text: 'Low Stock', className: 'bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-700 border-2 border-yellow-200', icon: <AlertTriangle className="h-3 w-3 mr-1" /> };
+      return { 
+        text: 'Low Stock', 
+        className: 'bg-amber-50 text-amber-700 border border-amber-200 ring-1 ring-amber-200', 
+        icon: <AlertTriangle className="h-3 w-3 mr-1" /> 
+      };
     } else {
-      return { text: 'In Stock', className: 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-2 border-green-200', icon: <CheckCircle className="h-3 w-3 mr-1" /> };
+      return { 
+        text: 'In Stock', 
+        className: 'bg-emerald-50 text-emerald-700 border border-emerald-200 ring-1 ring-emerald-200', 
+        icon: <CheckCircle className="h-3 w-3 mr-1" /> 
+      };
     }
   };
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-2xl shadow-red-500/20 border-2 border-red-200/50 p-6 max-w-md w-full text-center">
-          <div className="text-red-500 mb-4">
-            <AlertCircle className="h-12 w-12 mx-auto" />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 max-w-md w-full text-center">
+          <div className="text-red-500 mb-6">
+            <AlertCircle className="h-16 w-16 mx-auto" />
           </div>
-          <h3 className="text-xl font-bold text-red-900 mb-2">Error Loading Stock</h3>
-          <p className="text-red-800 mb-4 text-sm">{error}</p>
+          <h3 className="text-2xl font-semibold text-gray-900 mb-3">Error Loading Stock</h3>
+          <p className="text-gray-600 mb-6">{error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-300 shadow-lg text-sm"
+            className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl transition-colors shadow-lg font-medium"
           >
             Try Again
           </button>
@@ -319,224 +331,275 @@ export default function StockPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 p-6 space-y-6">
-      {/* Compact Header */}
-      <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl shadow-xl shadow-emerald-500/30 p-6 text-white">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-1">📦 Stock Management</h1>
-            <div className="flex items-center space-x-4 mt-2">
-              <p className="text-emerald-100 text-base">Manage inventory levels and stock adjustments</p>
-              <StockSyncStatus />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 p-6 space-y-8">
+      {/* Professional Header with Enhanced Design */}
+      <div className="bg-gradient-to-r from-slate-800 via-gray-800 to-zinc-800 rounded-2xl shadow-2xl p-8 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-indigo-600/10"></div>
+        <div className="relative z-10">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-white via-blue-100 to-indigo-100 bg-clip-text text-transparent">
+                Stock Management
+              </h1>
+              <div className="flex items-center space-x-6 mt-3">
+                <p className="text-gray-300 text-lg">Comprehensive inventory control and tracking</p>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
+                  <StockSyncStatus />
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center space-x-3 mt-4 lg:mt-0">
-            <button
-              onClick={handleManualSync}
-              disabled={loading}
-              className="flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-3 py-2 rounded-lg hover:bg-white/30 transition-all duration-300 text-sm disabled:opacity-50"
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              <span className="font-medium">{loading ? 'Syncing...' : 'Sync'}</span>
-            </button>
-            <button
-              onClick={handleGetLowStockItems}
-              disabled={loading}
-              className="flex items-center space-x-2 bg-gradient-to-r from-yellow-400 to-orange-500 px-3 py-2 rounded-lg hover:from-yellow-500 hover:to-orange-600 transition-all duration-300 shadow-lg text-sm"
-            >
-              <TrendingDown className="h-4 w-4" />
-              <span className="font-medium">Low Stock</span>
-            </button>
-            <button className="flex items-center space-x-2 bg-gradient-to-r from-blue-400 to-indigo-500 px-3 py-2 rounded-lg hover:from-blue-500 hover:to-indigo-600 transition-all duration-300 shadow-lg text-sm">
-              <Download className="h-4 w-4" />
-              <span className="font-medium">Export</span>
-            </button>
+            <div className="flex items-center space-x-4 mt-6 lg:mt-0">
+              <button
+                onClick={handleManualSync}
+                disabled={loading}
+                className="flex items-center space-x-3 bg-white/20 backdrop-blur-sm px-5 py-3 rounded-xl hover:bg-white/30 transition-all duration-300 disabled:opacity-50 border border-white/20"
+              >
+                <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+                <span className="font-semibold">{loading ? 'Syncing...' : 'Sync Inventory'}</span>
+              </button>
+              <button
+                onClick={handleGetLowStockItems}
+                disabled={loading}
+                className="flex items-center space-x-3 bg-gradient-to-r from-amber-500 to-orange-600 px-5 py-3 rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all duration-300 shadow-lg font-semibold"
+              >
+                <TrendingDown className="h-5 w-5" />
+                <span>Low Stock Alert</span>
+              </button>
+              <button className="flex items-center space-x-3 bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-3 rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-300 shadow-lg font-semibold">
+                <Download className="h-5 w-5" />
+                <span>Export Data</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Compact Stats Cards */}
+      {/* Enhanced Professional Stats Cards */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-xl shadow-blue-500/20 border-2 border-blue-200/50 p-3 hover:scale-105 transition-all duration-300">
-            <div className="flex items-center justify-between mb-2">
-              <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-2 rounded-lg shadow-lg shadow-blue-500/30">
-                <Package2 className="h-3 w-3" />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 group">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-3 rounded-xl shadow-lg">
+                <Package2 className="h-6 w-6" />
               </div>
-              <span className="text-sm">📦</span>
+              <div className="text-right">
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total</div>
+                <div className="text-xs text-blue-600 font-semibold">Products</div>
+              </div>
             </div>
-            <h3 className="text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              {stats.totalProducts}
-            </h3>
-            <p className="text-blue-600 font-semibold text-xs">Total Products</p>
+            <div className="space-y-1">
+              <h3 className="text-3xl font-bold text-gray-900">
+                {stats.totalProducts.toLocaleString()}
+              </h3>
+              <p className="text-sm text-gray-600">Active inventory items</p>
+            </div>
           </div>
 
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-xl shadow-green-500/20 border-2 border-green-200/50 p-3 hover:scale-105 transition-all duration-300">
-            <div className="flex items-center justify-between mb-2">
-              <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-2 rounded-lg shadow-lg shadow-green-500/30">
-                <BarChart3 className="h-3 w-3" />
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 group">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-3 rounded-xl shadow-lg">
+                <BarChart3 className="h-6 w-6" />
               </div>
-              <span className="text-sm">📊</span>
+              <div className="text-right">
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total</div>
+                <div className="text-xs text-emerald-600 font-semibold">Stock</div>
+              </div>
             </div>
-            <h3 className="text-sm font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-              {stats.totalStock.toLocaleString()}
-            </h3>
-            <p className="text-green-600 font-semibold text-xs">Total Stock</p>
+            <div className="space-y-1">
+              <h3 className="text-3xl font-bold text-gray-900">
+                {stats.totalStock.toLocaleString()}
+              </h3>
+              <p className="text-sm text-gray-600">Units in warehouse</p>
+            </div>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg shadow-xl shadow-purple-500/20 border-2 border-purple-200/50 p-3 hover:scale-105 transition-all duration-300">
-            <div className="flex items-center justify-between mb-2">
-              <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-2 rounded-lg shadow-lg shadow-purple-500/30">
-                <Activity className="h-3 w-3" />
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 group">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-gradient-to-r from-purple-500 to-pink-600 text-white p-3 rounded-xl shadow-lg">
+                <Activity className="h-6 w-6" />
               </div>
-              <span className="text-sm">📈</span>
+              <div className="text-right">
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Avg</div>
+                <div className="text-xs text-purple-600 font-semibold">Level</div>
+              </div>
             </div>
-            <h3 className="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              {Math.round(stats.averageStockLevel)}
-            </h3>
-            <p className="text-purple-600 font-semibold text-xs">Avg Level</p>
+            <div className="space-y-1">
+              <h3 className="text-3xl font-bold text-gray-900">
+                {Math.round(stats.averageStockLevel)}
+              </h3>
+              <p className="text-sm text-gray-600">Per product</p>
+            </div>
           </div>
 
-          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg shadow-xl shadow-yellow-500/20 border-2 border-yellow-200/50 p-3 hover:scale-105 transition-all duration-300">
-            <div className="flex items-center justify-between mb-2">
-              <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-2 rounded-lg shadow-lg shadow-yellow-500/30">
-                <AlertTriangle className="h-3 w-3" />
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 group">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white p-3 rounded-xl shadow-lg">
+                <AlertTriangle className="h-6 w-6" />
               </div>
-              <span className="text-sm">⚠️</span>
+              <div className="text-right">
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Low</div>
+                <div className="text-xs text-amber-600 font-semibold">Stock</div>
+              </div>
             </div>
-            <h3 className="text-sm font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
-              {stats.lowStockItems}
-            </h3>
-            <p className="text-yellow-600 font-semibold text-xs">Low Stock</p>
+            <div className="space-y-1">
+              <h3 className="text-3xl font-bold text-gray-900">
+                {stats.lowStockItems}
+              </h3>
+              <p className="text-sm text-gray-600">Need reorder</p>
+            </div>
           </div>
 
-          <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-lg shadow-xl shadow-red-500/20 border-2 border-red-200/50 p-3 hover:scale-105 transition-all duration-300">
-            <div className="flex items-center justify-between mb-2">
-              <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white p-2 rounded-lg shadow-lg shadow-red-500/30">
-                <XCircle className="h-3 w-3" />
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 group">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-gradient-to-r from-red-500 to-rose-600 text-white p-3 rounded-xl shadow-lg">
+                <XCircle className="h-6 w-6" />
               </div>
-              <span className="text-sm">❌</span>
+              <div className="text-right">
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Out of</div>
+                <div className="text-xs text-red-600 font-semibold">Stock</div>
+              </div>
             </div>
-            <h3 className="text-sm font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
-              {stats.outOfStockItems}
-            </h3>
-            <p className="text-red-600 font-semibold text-xs">Out of Stock</p>
+            <div className="space-y-1">
+              <h3 className="text-3xl font-bold text-gray-900">
+                {stats.outOfStockItems}
+              </h3>
+              <p className="text-sm text-gray-600">Immediate action</p>
+            </div>
           </div>
 
-          <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-lg shadow-xl shadow-teal-500/20 border-2 border-teal-200/50 p-3 hover:scale-105 transition-all duration-300">
-            <div className="flex items-center justify-between mb-2">
-              <div className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white p-2 rounded-lg shadow-lg shadow-teal-500/30">
-                <DollarSign className="h-3 w-3" />
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 group">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white p-3 rounded-xl shadow-lg">
+                <DollarSign className="h-6 w-6" />
               </div>
-              <span className="text-sm">💰</span>
+              <div className="text-right">
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total</div>
+                <div className="text-xs text-teal-600 font-semibold">Value</div>
+              </div>
             </div>
-            <h3 className="text-sm font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-              ₹{stats.totalValue.toLocaleString()}
-            </h3>
-            <p className="text-teal-600 font-semibold text-xs">Total Value</p>
+            <div className="space-y-1">
+              <h3 className="text-3xl font-bold text-gray-900">
+                ₹{(stats.totalValue / 1000).toFixed(0)}K
+              </h3>
+              <p className="text-sm text-gray-600">Inventory worth</p>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Search and Filters */}
-      <div className="bg-white rounded-xl shadow-lg shadow-gray-500/10 border-2 border-gray-100/50 p-4">
-        <div className="flex flex-col lg:flex-row gap-4">
-          {/* Search */}
-          <form onSubmit={handleSearch} className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <input
-                type="text"
-                placeholder="🔍 Search products, SKUs..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:outline-none text-sm"
-              />
+      {/* Enhanced Search and Filters */}
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div className="bg-gradient-to-r from-gray-50 to-slate-50 px-8 py-6 border-b border-gray-200">
+          <div className="flex items-center space-x-3">
+            <div className="bg-gray-900 p-2 rounded-lg">
+              <Search className="h-5 w-5 text-white" />
             </div>
-          </form>
-          
-          {/* Filters */}
-          <div className="flex flex-wrap gap-2">
-            <select
-              value={localFilters.sortBy || 'createdAt'}
-              onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-              className="px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:outline-none text-sm bg-white"
-            >
-              <option value="createdAt">📅 Sort by Date</option>
-              <option value="quantityAvailable">📊 Sort by Stock</option>
-              <option value="product.name">🏷️ Sort by Name</option>
-            </select>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">Search & Filter</h2>
+              <p className="text-sm text-gray-600">Find and filter your inventory items</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="p-8">
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Enhanced Search */}
+            <form onSubmit={handleSearch} className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <input
+                  type="text"
+                  placeholder="Search products, SKUs, categories..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:border-gray-900 focus:ring-4 focus:ring-gray-100 focus:outline-none text-base transition-all duration-200 bg-gray-50 hover:bg-white"
+                />
+              </div>
+            </form>
             
-            <select
-              value={localFilters.sortOrder || 'desc'}
-              onChange={(e) => handleFilterChange('sortOrder', e.target.value)}
-              className="px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:outline-none text-sm bg-white"
-            >
-              <option value="desc">⬇️ Descending</option>
-              <option value="asc">⬆️ Ascending</option>
-            </select>
+            {/* Enhanced Filters */}
+            <div className="flex flex-wrap gap-4">
+              <select
+                value={localFilters.sortBy || 'createdAt'}
+                onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-gray-900 focus:ring-4 focus:ring-gray-100 focus:outline-none text-sm bg-white hover:border-gray-300 transition-all duration-200 min-w-[160px]"
+              >
+                <option value="createdAt">Sort by Date</option>
+                <option value="quantityAvailable">Sort by Stock</option>
+                <option value="product.name">Sort by Name</option>
+              </select>
+              
+              <select
+                value={localFilters.sortOrder || 'desc'}
+                onChange={(e) => handleFilterChange('sortOrder', e.target.value)}
+                className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-gray-900 focus:ring-4 focus:ring-gray-100 focus:outline-none text-sm bg-white hover:border-gray-300 transition-all duration-200"
+              >
+                <option value="desc">Descending</option>
+                <option value="asc">Ascending</option>
+              </select>
 
-            <label className="flex items-center space-x-2 px-3 py-2 border-2 border-gray-200 rounded-lg bg-white">
-              <input
-                type="checkbox"
-                checked={localFilters.lowStock}
-                onChange={(e) => handleFilterChange('lowStock', e.target.checked)}
-                className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-              />
-              <span className="text-sm text-gray-700">⚠️ Low Stock Only</span>
-            </label>
+              <label className="flex items-center space-x-3 px-4 py-3 border-2 border-gray-200 rounded-xl bg-white hover:border-gray-300 transition-all duration-200 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={localFilters.lowStock}
+                  onChange={(e) => handleFilterChange('lowStock', e.target.checked)}
+                  className="rounded border-gray-300 text-gray-900 focus:ring-gray-500 w-4 h-4"
+                />
+                <span className="text-sm text-gray-700 font-medium">Low Stock Only</span>
+              </label>
 
-            <label className="flex items-center space-x-2 px-3 py-2 border-2 border-gray-200 rounded-lg bg-white">
-              <input
-                type="checkbox"
-                checked={localFilters.outOfStock}
-                onChange={(e) => handleFilterChange('outOfStock', e.target.checked)}
-                className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-              />
-              <span className="text-sm text-gray-700">❌ Out of Stock Only</span>
-            </label>
-            
-            <button
-              onClick={() => {
-                setLocalFilters({
-                  search: '',
-                  lowStock: false,
-                  outOfStock: false,
-                  sortBy: 'createdAt',
-                  sortOrder: 'desc'
-                });
-                setSearchTerm('');
-              }}
-              className="flex items-center space-x-1 px-3 py-2 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-lg hover:from-gray-500 hover:to-gray-600 transition-all duration-300 text-sm"
-            >
-              <Filter className="h-3 w-3" />
-              <span>Clear</span>
-            </button>
+              <label className="flex items-center space-x-3 px-4 py-3 border-2 border-gray-200 rounded-xl bg-white hover:border-gray-300 transition-all duration-200 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={localFilters.outOfStock}
+                  onChange={(e) => handleFilterChange('outOfStock', e.target.checked)}
+                  className="rounded border-gray-300 text-gray-900 focus:ring-gray-500 w-4 h-4"
+                />
+                <span className="text-sm text-gray-700 font-medium">Out of Stock Only</span>
+              </label>
+              
+              <button
+                onClick={() => {
+                  setLocalFilters({
+                    search: '',
+                    lowStock: false,
+                    outOfStock: false,
+                    sortBy: 'createdAt',
+                    sortOrder: 'desc'
+                  });
+                  setSearchTerm('');
+                }}
+                className="flex items-center space-x-2 px-4 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-all duration-200 text-sm font-medium"
+              >
+                <Filter className="h-4 w-4" />
+                <span>Clear All</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Stock Table */}
-      <div className="bg-white rounded-xl shadow-lg shadow-gray-500/10 border-2 border-gray-100/50 overflow-hidden">
-        <div className="p-4 border-b-2 border-gray-100">
+      {/* Enhanced Professional Stock Table */}
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div className="bg-gradient-to-r from-gray-50 to-slate-50 px-8 py-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold bg-gradient-to-r from-gray-700 to-gray-900 bg-clip-text text-transparent">
-                📦 Stock Inventory
+              <h2 className="text-2xl font-semibold text-gray-900">
+                Stock Inventory
               </h2>
-              <p className="text-gray-500 text-sm">
+              <p className="text-gray-600 mt-1">
                 {selectedItems.length > 0 && `${selectedItems.length} items selected • `}
                 {items.length} products • Page {pagination?.currentPage || 1} of {pagination?.totalPages || 1}
               </p>
             </div>
             {selectedItems.length > 0 && (
-              <div className="flex space-x-2">
-                <button className="flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg shadow-blue-500/30 text-sm">
-                  <Upload className="h-3 w-3" />
+              <div className="flex space-x-3">
+                <button className="flex items-center space-x-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl hover:from-blue-700 hover:to-indigo-800 transition-all duration-300 shadow-lg font-medium">
+                  <Upload className="h-4 w-4" />
                   <span>Bulk Update</span>
                 </button>
-                <button className="flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg shadow-green-500/30 text-sm">
-                  <Download className="h-3 w-3" />
+                <button className="flex items-center space-x-2 px-5 py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-xl hover:from-emerald-700 hover:to-teal-800 transition-all duration-300 shadow-lg font-medium">
+                  <Download className="h-4 w-4" />
                   <span>Export Selected</span>
                 </button>
               </div>
@@ -546,22 +609,22 @@ export default function StockPage() {
 
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
+            <thead className="bg-gradient-to-r from-gray-900 to-slate-800 text-white">
               <tr>
-                <th className="px-4 py-3 text-left">
+                <th className="px-8 py-4 text-left">
                   <input
                     type="checkbox"
                     checked={selectedItems.length === items.length && items.length > 0}
                     onChange={selectAllItems}
-                    className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 h-4 w-4"
+                    className="rounded border-gray-300 text-gray-900 focus:ring-gray-500 h-4 w-4"
                   />
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Product</th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Stock</th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Price</th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Last Updated</th>
-                <th className="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Actions</th>
+                <th className="px-8 py-4 text-left text-sm font-semibold uppercase tracking-wider">Product Details</th>
+                <th className="px-8 py-4 text-left text-sm font-semibold uppercase tracking-wider">Stock Level</th>
+                <th className="px-8 py-4 text-left text-sm font-semibold uppercase tracking-wider">Status</th>
+                <th className="px-8 py-4 text-left text-sm font-semibold uppercase tracking-wider">Pricing</th>
+                <th className="px-8 py-4 text-left text-sm font-semibold uppercase tracking-wider">Last Updated</th>
+                <th className="px-8 py-4 text-right text-sm font-semibold uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">

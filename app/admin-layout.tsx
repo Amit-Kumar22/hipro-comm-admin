@@ -88,59 +88,67 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Colorful Enhanced Header */}
-      <header className="bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 shadow-lg border-b-2 border-orange-300">
+      {/* Professional Header */}
+      <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="px-6 sm:px-8 lg:px-12">
-          <div className="flex justify-between items-center h-20">
-            <div className="flex items-center space-x-6">
-              <Link href="/" className="text-2xl font-bold text-white drop-shadow-lg hover:text-yellow-300 transition-colors">
-                🚀 Hiprotech Admin
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4">
+              <Link href="/" className="text-xl font-semibold text-gray-900 hover:text-gray-700 transition-colors">
+                Hiprotech Admin
               </Link>
-              <span className="text-sm bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg">
-                ✨ {user?.name}
+              <span className="text-sm bg-gray-100 text-gray-700 px-3 py-1 rounded-md font-medium">
+                {user?.name}
               </span>
             </div>
-            <nav className="hidden md:flex space-x-8">
+            <nav className="hidden md:flex space-x-1">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-sm text-white hover:text-yellow-300 transition-all duration-300 flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/20 backdrop-blur-sm font-medium"
+                  className={`text-sm transition-colors px-3 py-2 rounded-md font-medium flex items-center space-x-2 ${
+                    pathname === item.href
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
                 >
-                  <span className="text-base">{item.icon}</span>
+                  <span className="text-sm">{item.icon}</span>
                   <span>{item.name}</span>
                 </Link>
               ))}
             </nav>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               <a 
                 href="http://localhost:3000" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white px-4 py-2 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl font-medium"
+                className="text-sm bg-gray-900 hover:bg-gray-800 text-white px-3 py-2 rounded-md transition-colors font-medium"
               >
-                🌐 View Site
+                View Site
               </a>
               <button 
                 onClick={handleLogout}
-                className="text-sm bg-gradient-to-r from-red-400 to-pink-500 hover:from-red-500 hover:to-pink-600 text-white px-4 py-2 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl font-medium"
+                className="text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md transition-colors font-medium"
               >
-                🚪 Logout
+                Logout
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Colorful Mobile Navigation */}
-      <div className="md:hidden bg-gradient-to-r from-purple-500 to-pink-500 border-b-2 border-purple-300">
-        <div className="px-6 py-4">
-          <div className="flex space-x-6 overflow-x-auto">
+      {/* Mobile Navigation */}
+      <div className="md:hidden bg-white border-b border-gray-200">
+        <div className="px-6 py-3">
+          <div className="flex space-x-4 overflow-x-auto">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="flex-shrink-0 text-sm text-white hover:text-yellow-300 transition-all duration-300 flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/20 backdrop-blur-sm font-medium"
+                className={`flex-shrink-0 text-sm transition-colors px-3 py-2 rounded-md font-medium flex items-center space-x-2 ${
+                  pathname === item.href
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
               >
                 <span className="text-sm">{item.icon}</span>
                 <span>{item.name}</span>
@@ -151,7 +159,7 @@ export default function AdminLayout({
       </div>
 
       {/* Main Content */}
-      <main className="p-4 lg:p-6">
+      <main className="p-6">
         <InventorySyncService>
           {children}
         </InventorySyncService>

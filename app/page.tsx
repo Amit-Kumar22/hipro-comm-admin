@@ -63,12 +63,12 @@ export default function AdminDashboard() {
   const categoryData = dashboardStats?.topCategories?.map((category, index) => ({
     name: category.name,
     value: category.productCount,
-    color: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'][index % 5]
+    color: ['#374151', '#6b7280', '#9ca3af', '#d1d5db', '#e5e7eb'][index % 5]
   })) || [
-    { name: 'Electronics', value: 45, color: '#3B82F6' },
-    { name: 'Clothing', value: 30, color: '#10B981' },
-    { name: 'Books', value: 15, color: '#F59E0B' },
-    { name: 'Home & Garden', value: 10, color: '#EF4444' }
+    { name: 'Electronics', value: 45, color: '#374151' },
+    { name: 'Clothing', value: 30, color: '#6b7280' },
+    { name: 'Books', value: 15, color: '#9ca3af' },
+    { name: 'Home & Garden', value: 10, color: '#d1d5db' }
   ];
 
   const revenueData = [
@@ -105,250 +105,288 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
-      <div className="max-w-7xl mx-auto p-8 space-y-10">
-        {/* Enhanced Colorful Header */}
-        <div className="text-center lg:text-left bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 p-8 rounded-3xl shadow-2xl shadow-purple-500/30">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-white via-yellow-200 to-white bg-clip-text text-transparent drop-shadow-lg">
-            🚀 Analytics Dashboard
-          </h1>
-          <p className="text-white/90 mt-3 text-xl font-medium">
-            ✨ Real-time insights into your e-commerce performance
-          </p>
-          <div className="flex items-center justify-center lg:justify-start space-x-6 mt-6">
-            <div className="flex items-center space-x-2 text-sm text-white bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm">
-              <Globe className="h-5 w-5 text-green-300" />
-              <span className="font-semibold">🌍 Live Data</span>
-            </div>
-            <div className="flex items-center space-x-2 text-sm text-white bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm">
-              <Zap className="h-5 w-5 text-yellow-300" />
-              <span className="font-semibold">⚡ System Healthy</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
+        {/* Enhanced Professional Header */}
+        <div className="bg-gradient-to-r from-white via-blue-50 to-indigo-50 border border-blue-200/50 rounded-xl shadow-lg backdrop-blur-sm">
+          <div className="p-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+                  Dashboard
+                </h1>
+                <p className="text-slate-600 mt-2 text-lg">
+                  Welcome back! Here's what's happening with your business today.
+                </p>
+              </div>
+              <div className="hidden md:flex items-center space-x-4">
+                <div className="bg-white/70 backdrop-blur-sm border border-blue-200 px-4 py-2 rounded-xl shadow-sm">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3 h-3 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-slate-700 font-semibold">Live Data</span>
+                  </div>
+                </div>
+                <div className="bg-white/70 backdrop-blur-sm border border-blue-200 px-4 py-2 rounded-xl shadow-sm">
+                  <div className="flex items-center space-x-3">
+                    <Activity className="h-5 w-5 text-blue-600" />
+                    <span className="text-slate-700 font-semibold">System Healthy</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Enhanced Colorful Metrics Grid */}
+        {/* Enhanced Metrics Grid with Gradients */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {loading ? (
             Array(4).fill(0).map((_, i) => <MetricCardSkeleton key={i} />)
           ) : (
             <>
-              <MetricCard
-                title="Total Users"
-                value={dashboardStats?.overview?.totalUsers || 1250}
-                change={{ value: 12.5, type: 'increase', period: 'last month' }}
-                icon={<Users className="h-6 w-6" />}
-                colorScheme="blue"
-                format="number"
-              />
-              <MetricCard
-                title="Products"
-                value={dashboardStats?.overview?.totalProducts || 890}
-                change={{ value: 8.2, type: 'increase', period: 'last month' }}
-                icon={<Package className="h-6 w-6" />}
-                colorScheme="green"
-                format="number"
-              />
-              <MetricCard
-                title="Total Orders"
-                value={dashboardStats?.overview?.totalOrders || 2340}
-                change={{ value: 23.1, type: 'increase', period: 'last month' }}
-                icon={<ShoppingBag className="h-6 w-6" />}
-                colorScheme="purple"
-                format="number"
-              />
-              <MetricCard
-                title="Revenue"
-                value={420000}
-                change={{ value: 15.8, type: 'increase', period: 'last month' }}
-                icon={<DollarSign className="h-6 w-6" />}
-                colorScheme="orange"
-                format="currency"
-              />
+              <div className="bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <div className="p-6 text-white">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
+                      <Users className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="text-right">
+                      <div className="text-gray-100 text-sm font-medium">+12.5%</div>
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold mb-2">
+                    {(dashboardStats?.overview?.totalUsers || 1250).toLocaleString()}
+                  </div>
+                  <div className="text-gray-100 font-medium">Total Users</div>
+                  <div className="text-gray-200 text-sm mt-1">+12.5% from last month</div>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <div className="p-6 text-white">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
+                      <Package className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="text-right">
+                      <div className="text-gray-100 text-sm font-medium">+8.2%</div>
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold mb-2">
+                    {(dashboardStats?.overview?.totalProducts || 3).toLocaleString()}
+                  </div>
+                  <div className="text-gray-100 font-medium">Products</div>
+                  <div className="text-gray-200 text-sm mt-1">+8.2% from last month</div>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <div className="p-6 text-white">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
+                      <ShoppingBag className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="text-right">
+                      <div className="text-gray-100 text-sm font-medium">+23.1%</div>
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold mb-2">
+                    {(dashboardStats?.overview?.totalOrders || 2340).toLocaleString()}
+                  </div>
+                  <div className="text-gray-100 font-medium">Total Orders</div>
+                  <div className="text-gray-200 text-sm mt-1">+23.1% from last month</div>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <div className="p-6 text-white">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
+                      <DollarSign className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="text-right">
+                      <div className="text-gray-100 text-sm font-medium">+15.8%</div>
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold mb-2">
+                    ₹{(420000).toLocaleString('en-IN')}
+                  </div>
+                  <div className="text-gray-100 font-medium">Revenue</div>
+                  <div className="text-gray-200 text-sm mt-1">+15.8% from last month</div>
+                </div>
+              </div>
             </>
           )}
         </div>
 
-        {/* Enhanced Colorful Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        {/* Enhanced Charts Section with Modern Design */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Sales Analytics */}
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl shadow-2xl shadow-blue-500/20 border-2 border-blue-200/50 p-10 hover:shadow-3xl hover:shadow-blue-500/30 transition-all duration-300">
-            <div className="flex items-center justify-between mb-10">
-              <div>
-                <h3 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">📊 Sales Analytics</h3>
-                <p className="text-blue-600/80 mt-2 text-lg font-medium">Monthly performance overview</p>
-              </div>
-              <div className="flex items-center space-x-2 text-green-700 bg-gradient-to-r from-green-100 to-emerald-100 px-4 py-3 rounded-xl shadow-lg">
-                <TrendingUp className="h-6 w-6" />
-                <span className="font-bold text-lg">+18.2%</span>
+          <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="p-6 border-b border-slate-200/50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900">Sales Analytics</h3>
+                  <p className="text-slate-600 mt-1">Monthly performance overview</p>
+                </div>
+                <div className="flex items-center space-x-2 text-emerald-700 bg-gradient-to-r from-emerald-50 to-green-50 px-4 py-2 rounded-xl border border-emerald-200">
+                  <TrendingUp className="h-5 w-5" />
+                  <span className="font-bold text-sm">+18.2%</span>
+                </div>
               </div>
             </div>
-            <SalesChart data={salesData} />
+            <div className="p-6">
+              <SalesChart data={salesData} />
+            </div>
           </div>
 
           {/* Revenue Trend */}
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl shadow-2xl shadow-purple-500/20 border-2 border-purple-200/50 p-10 hover:shadow-3xl hover:shadow-purple-500/30 transition-all duration-300">
-            <div className="flex items-center justify-between mb-10">
-              <div>
-                <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">💰 Weekly Revenue</h3>
-                <p className="text-purple-600/80 mt-2 text-lg font-medium">Last 7 days performance</p>
-              </div>
-              <div className="text-purple-500 bg-gradient-to-r from-purple-100 to-pink-100 p-3 rounded-xl shadow-lg">
-                <Activity className="h-8 w-8" />
+          <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="p-6 border-b border-slate-200/50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900">Weekly Revenue</h3>
+                  <p className="text-slate-600 mt-1">Last 7 days performance</p>
+                </div>
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-3 rounded-xl">
+                  <Activity className="h-5 w-5 text-blue-600" />
+                </div>
               </div>
             </div>
-            <RevenueLineChart data={revenueData} />
+            <div className="p-6">
+              <RevenueLineChart data={revenueData} />
+            </div>
           </div>
         </div>
 
-        {/* Additional Colorful Analytics */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        {/* Enhanced Additional Analytics */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Category Distribution */}
-          <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-3xl shadow-2xl shadow-orange-500/20 border-2 border-orange-200/50 p-10 hover:shadow-3xl hover:shadow-orange-500/30 transition-all duration-300">
-            <div className="flex items-center justify-between mb-10">
-              <div>
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent">🎯 Product Distribution</h3>
-                <p className="text-orange-600/80 mt-2 text-lg font-medium">By categories</p>
-              </div>
-              <Target className="h-8 w-8 text-orange-500 bg-gradient-to-r from-orange-100 to-yellow-100 p-2 rounded-xl shadow-lg" />
-            </div>
-            <CategoryPieChart data={categoryData} />
-            <div className="mt-6 space-y-3">
-              {categoryData.slice(0, 4).map((item, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div 
-                      className="w-4 h-4 rounded-full" 
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="text-sm font-medium text-gray-700">{item.name}</span>
-                  </div>
-                  <span className="text-sm text-gray-600">{item.value} products</span>
+          <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="p-6 border-b border-slate-200/50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900">Product Distribution</h3>
+                  <p className="text-slate-600 mt-1">By categories</p>
                 </div>
-              ))}
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 p-3 rounded-xl">
+                  <Target className="h-5 w-5 text-orange-600" />
+                </div>
+              </div>
+            </div>
+            <div className="p-6">
+              <CategoryPieChart data={categoryData} />
+              <div className="mt-6 space-y-3">
+                {categoryData.slice(0, 4).map((item, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-lg border border-slate-200/50">
+                    <div className="flex items-center space-x-3">
+                      <div 
+                        className="w-4 h-4 rounded-full shadow-sm" 
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="text-sm font-semibold text-slate-700">{item.name}</span>
+                    </div>
+                    <span className="text-sm text-slate-500 bg-white px-2 py-1 rounded-md">{item.value} products</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* User Growth */}
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl shadow-2xl shadow-green-500/20 border-2 border-green-200/50 p-10 hover:shadow-3xl hover:shadow-green-500/30 transition-all duration-300">
-            <div className="flex items-center justify-between mb-10">
-              <div>
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">📈 User Growth</h3>
-                <p className="text-green-600/80 mt-2 text-lg font-medium">New registrations</p>
+          <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="p-6 border-b border-slate-200/50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900">User Growth</h3>
+                  <p className="text-slate-600 mt-1">New registrations</p>
+                </div>
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-3 rounded-xl">
+                  <ArrowUpRight className="h-5 w-5 text-green-600" />
+                </div>
               </div>
-              <ArrowUpRight className="h-8 w-8 text-green-500 bg-gradient-to-r from-green-100 to-emerald-100 p-2 rounded-xl shadow-lg" />
             </div>
-            <UserGrowthData data={userGrowthData} />
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <div className="flex items-center space-x-2 text-blue-700">
-                <Users className="h-5 w-5" />
-                <span className="font-semibold">280 new users this month</span>
+            <div className="p-6">
+              <UserGrowthChart data={userGrowthData} />
+              <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                <div className="flex items-center space-x-2 text-green-800">
+                  <Users className="h-5 w-5" />
+                  <span className="font-bold text-sm">280 new users this month</span>
+                </div>
+                <p className="text-green-600 text-sm mt-1 font-medium">+28% increase from last month</p>
               </div>
-              <p className="text-blue-600 text-sm mt-1">+28% increase from last month</p>
             </div>
           </div>
 
-          {/* Recent Activity Enhanced */}
-          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-3xl shadow-2xl shadow-indigo-500/20 border-2 border-indigo-200/50 p-10 hover:shadow-3xl hover:shadow-indigo-500/30 transition-all duration-300">
-            <div className="flex items-center justify-between mb-10">
-              <div>
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">⚡ Live Activity</h3>
-                <p className="text-indigo-600/80 mt-2 text-lg font-medium">Real-time updates</p>
-              </div>
-              <div className="flex items-center space-x-3 bg-gradient-to-r from-indigo-100 to-blue-100 px-4 py-2 rounded-xl shadow-lg">
-                <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse shadow-lg"></div>
-                <Clock className="h-6 w-6 text-indigo-500" />
+          {/* Recent Activity */}
+          <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="p-6 border-b border-slate-200/50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900">Recent Activity</h3>
+                  <p className="text-slate-600 mt-1">Latest updates</p>
+                </div>
+                <div className="flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 px-3 py-2 rounded-xl">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <Clock className="h-4 w-4 text-blue-600" />
+                </div>
               </div>
             </div>
-            
-            {loading ? (
-              <div className="space-y-4">
-                {Array(4).fill(0).map((_, i) => (
-                  <div key={i} className="animate-pulse flex items-center space-x-4">
-                    <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
-                    <div className="flex-1">
-                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : recentActivity.length > 0 ? (
-              <div className="space-y-4 max-h-80 overflow-y-auto">
-                {recentActivity.map((activity) => (
-                  <div key={activity._id} className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-xl transition-colors group">
-                    <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                      <span className="text-white text-lg">
-                        {activity.type === 'user_registered' ? '👤' : 
-                         activity.type === 'product_created' ? '📦' : '⚡'}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 mb-1">{activity.title}</p>
-                      <p className="text-sm text-gray-600 mb-2">{activity.subtitle}</p>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xs text-gray-400">
-                          {new Date(activity.timestamp).toLocaleDateString('en-IN', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </span>
-                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                          {activity.type.replace('_', ' ')}
-                        </span>
+            <div className="p-6">
+              {loading ? (
+                <div className="space-y-4">
+                  {Array(4).fill(0).map((_, i) => (
+                    <div key={i} className="animate-pulse flex items-center space-x-4">
+                      <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Activity className="h-8 w-8 text-gray-400" />
+                  ))}
                 </div>
-                <h4 className="text-lg font-medium text-gray-900 mb-2">No Recent Activity</h4>
-                <p className="text-gray-500 text-sm">Activity will appear here when users interact with your store</p>
-              </div>
-            )}
+              ) : recentActivity.length > 0 ? (
+                <div className="space-y-4 max-h-80 overflow-y-auto">
+                  {recentActivity.map((activity) => (
+                    <div key={activity._id} className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-md transition-colors">
+                      <div className="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                        <span className="text-gray-600 text-sm">
+                          {activity.type === 'user_registered' ? '👤' : 
+                           activity.type === 'product_created' ? '📦' : '⚡'}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900">{activity.title}</p>
+                        <p className="text-sm text-gray-600 mb-1">{activity.subtitle}</p>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs text-gray-500">
+                            {new Date(activity.timestamp).toLocaleDateString('en-IN', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                            {activity.type.replace('_', ' ')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Activity className="h-6 w-6 text-gray-400" />
+                  </div>
+                  <h4 className="text-sm font-medium text-gray-900 mb-1">No Recent Activity</h4>
+                  <p className="text-gray-500 text-xs">Activity will appear here when users interact with your store</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
     </div>
-  );
-}
-
-// Helper component for User Growth
-function UserGrowthData({ data }: { data: any[] }) {
-  return (
-    <ResponsiveContainer width="100%" height={200}>
-      <AreaChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-        <XAxis dataKey="month" stroke="#666" fontSize={11} />
-        <YAxis stroke="#666" fontSize={11} />
-        <Tooltip 
-          contentStyle={{ 
-            backgroundColor: '#fff',
-            border: '1px solid #e5e7eb',
-            borderRadius: '12px',
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
-          }}
-        />
-        <Area 
-          type="monotone" 
-          dataKey="users" 
-          stroke="#3B82F6" 
-          fill="url(#colorUsers)" 
-          strokeWidth={2}
-        />
-        <defs>
-          <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.05}/>
-          </linearGradient>
-        </defs>
-      </AreaChart>
-    </ResponsiveContainer>
   );
 }
