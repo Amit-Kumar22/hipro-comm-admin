@@ -312,7 +312,7 @@ export default function StockPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-6">
         <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 max-w-md w-full text-center">
           <div className="text-red-500 mb-6">
             <AlertCircle className="h-16 w-16 mx-auto" />
@@ -321,7 +321,7 @@ export default function StockPage() {
           <p className="text-gray-600 mb-6">{error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl transition-colors shadow-lg font-medium"
+            className="bg-gradient-to-r from-slate-500 to-blue-500 hover:from-slate-600 hover:to-blue-600 text-white px-6 py-3 rounded-xl transition-all duration-300 shadow-lg font-medium"
           >
             Try Again
           </button>
@@ -331,231 +331,193 @@ export default function StockPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 p-6 space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
       {/* Professional Header with Enhanced Design */}
-      <div className="bg-gradient-to-r from-slate-800 via-gray-800 to-zinc-800 rounded-2xl shadow-2xl p-8 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-indigo-600/10"></div>
-        <div className="relative z-10">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-white via-blue-100 to-indigo-100 bg-clip-text text-transparent">
-                Stock Management
-              </h1>
-              <div className="flex items-center space-x-6 mt-3">
-                <p className="text-gray-300 text-lg">Comprehensive inventory control and tracking</p>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
-                  <StockSyncStatus />
-                </div>
+      <div className="bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700 rounded-2xl shadow-xl shadow-gray-500/30 p-6 text-white">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white">
+              📦 Stock Management
+            </h1>
+            <div className="flex items-center space-x-6 mt-3">
+              <p className="text-gray-100 text-base">Comprehensive inventory control and tracking</p>
+              <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2">
+                <StockSyncStatus />
               </div>
             </div>
-            <div className="flex items-center space-x-4 mt-6 lg:mt-0">
-              <button
-                onClick={handleManualSync}
-                disabled={loading}
-                className="flex items-center space-x-3 bg-white/20 backdrop-blur-sm px-5 py-3 rounded-xl hover:bg-white/30 transition-all duration-300 disabled:opacity-50 border border-white/20"
-              >
-                <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
-                <span className="font-semibold">{loading ? 'Syncing...' : 'Sync Inventory'}</span>
-              </button>
-              <button
-                onClick={handleGetLowStockItems}
-                disabled={loading}
-                className="flex items-center space-x-3 bg-gradient-to-r from-amber-500 to-orange-600 px-5 py-3 rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all duration-300 shadow-lg font-semibold"
-              >
-                <TrendingDown className="h-5 w-5" />
-                <span>Low Stock Alert</span>
-              </button>
-              <button className="flex items-center space-x-3 bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-3 rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-300 shadow-lg font-semibold">
-                <Download className="h-5 w-5" />
-                <span>Export Data</span>
-              </button>
-            </div>
+          </div>
+          <div className="flex items-center space-x-2 mt-3 lg:mt-0">
+            <button
+              onClick={handleManualSync}
+              disabled={loading}
+              className="flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-3 py-2 rounded-lg hover:bg-white/30 transition-all duration-300 disabled:opacity-50 text-sm"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              <span className="font-medium">{loading ? 'Syncing...' : 'Sync Inventory'}</span>
+            </button>
+            <button
+              onClick={handleGetLowStockItems}
+              disabled={loading}
+              className="flex items-center space-x-2 bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-2 rounded-lg hover:from-amber-500 hover:to-amber-600 transition-all duration-300 shadow-lg text-sm font-medium"
+            >
+              <TrendingDown className="h-4 w-4" />
+              <span>Low Stock</span>
+            </button>
+            <button className="flex items-center space-x-2 bg-gradient-to-r from-slate-400 to-slate-500 px-3 py-2 rounded-lg hover:from-slate-500 hover:to-slate-600 transition-all duration-300 shadow-lg text-sm font-medium">
+              <Download className="h-4 w-4" />
+              <span>Export</span>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Enhanced Professional Stats Cards */}
+      {/* Enhanced Stats Cards */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-3 rounded-xl shadow-lg">
-                <Package2 className="h-6 w-6" />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-lg shadow-xl shadow-slate-500/20 border-2 border-slate-200/50 p-3 hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <div className="bg-gradient-to-r from-slate-500 to-slate-600 text-white p-2 rounded-lg shadow-lg shadow-slate-500/30">
+                <Package2 className="h-4 w-4" />
               </div>
-              <div className="text-right">
-                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total</div>
-                <div className="text-xs text-blue-600 font-semibold">Products</div>
-              </div>
+              <span className="text-base">📦</span>
             </div>
-            <div className="space-y-1">
-              <h3 className="text-3xl font-bold text-gray-900">
-                {stats.totalProducts.toLocaleString()}
-              </h3>
-              <p className="text-sm text-gray-600">Active inventory items</p>
-            </div>
+            <h3 className="text-lg font-bold bg-gradient-to-r from-slate-600 to-slate-700 bg-clip-text text-transparent">
+              {stats.totalProducts.toLocaleString()}
+            </h3>
+            <p className="text-slate-600 font-semibold text-xs">Total Products</p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-3 rounded-xl shadow-lg">
-                <BarChart3 className="h-6 w-6" />
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-xl shadow-green-500/20 border-2 border-green-200/50 p-3 hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-2 rounded-lg shadow-lg shadow-green-500/30">
+                <BarChart3 className="h-4 w-4" />
               </div>
-              <div className="text-right">
-                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total</div>
-                <div className="text-xs text-emerald-600 font-semibold">Stock</div>
-              </div>
+              <span className="text-base">📊</span>
             </div>
-            <div className="space-y-1">
-              <h3 className="text-3xl font-bold text-gray-900">
-                {stats.totalStock.toLocaleString()}
-              </h3>
-              <p className="text-sm text-gray-600">Units in warehouse</p>
-            </div>
+            <h3 className="text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+              {stats.totalStock.toLocaleString()}
+            </h3>
+            <p className="text-green-600 font-semibold text-xs">Total Stock</p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-gradient-to-r from-purple-500 to-pink-600 text-white p-3 rounded-xl shadow-lg">
-                <Activity className="h-6 w-6" />
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg shadow-xl shadow-purple-500/20 border-2 border-purple-200/50 p-3 hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-2 rounded-lg shadow-lg shadow-purple-500/30">
+                <Activity className="h-4 w-4" />
               </div>
-              <div className="text-right">
-                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Avg</div>
-                <div className="text-xs text-purple-600 font-semibold">Level</div>
-              </div>
+              <span className="text-base">📈</span>
             </div>
-            <div className="space-y-1">
-              <h3 className="text-3xl font-bold text-gray-900">
-                {Math.round(stats.averageStockLevel)}
-              </h3>
-              <p className="text-sm text-gray-600">Per product</p>
-            </div>
+            <h3 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              {Math.round(stats.averageStockLevel)}
+            </h3>
+            <p className="text-purple-600 font-semibold text-xs">Avg Level</p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white p-3 rounded-xl shadow-lg">
-                <AlertTriangle className="h-6 w-6" />
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg shadow-xl shadow-amber-500/20 border-2 border-amber-200/50 p-3 hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-2 rounded-lg shadow-lg shadow-amber-500/30">
+                <AlertTriangle className="h-4 w-4" />
               </div>
-              <div className="text-right">
-                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Low</div>
-                <div className="text-xs text-amber-600 font-semibold">Stock</div>
-              </div>
+              <span className="text-base">⚠️</span>
             </div>
-            <div className="space-y-1">
-              <h3 className="text-3xl font-bold text-gray-900">
-                {stats.lowStockItems}
-              </h3>
-              <p className="text-sm text-gray-600">Need reorder</p>
-            </div>
+            <h3 className="text-lg font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+              {stats.lowStockItems}
+            </h3>
+            <p className="text-amber-600 font-semibold text-xs">Low Stock</p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-gradient-to-r from-red-500 to-rose-600 text-white p-3 rounded-xl shadow-lg">
-                <XCircle className="h-6 w-6" />
+          <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-lg shadow-xl shadow-red-500/20 border-2 border-red-200/50 p-3 hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white p-2 rounded-lg shadow-lg shadow-red-500/30">
+                <XCircle className="h-4 w-4" />
               </div>
-              <div className="text-right">
-                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Out of</div>
-                <div className="text-xs text-red-600 font-semibold">Stock</div>
-              </div>
+              <span className="text-base">❌</span>
             </div>
-            <div className="space-y-1">
-              <h3 className="text-3xl font-bold text-gray-900">
-                {stats.outOfStockItems}
-              </h3>
-              <p className="text-sm text-gray-600">Immediate action</p>
-            </div>
+            <h3 className="text-lg font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+              {stats.outOfStockItems}
+            </h3>
+            <p className="text-red-600 font-semibold text-xs">Out of Stock</p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white p-3 rounded-xl shadow-lg">
-                <DollarSign className="h-6 w-6" />
+          <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-lg shadow-xl shadow-teal-500/20 border-2 border-teal-200/50 p-3 hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <div className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white p-2 rounded-lg shadow-lg shadow-teal-500/30">
+                <DollarSign className="h-4 w-4" />
               </div>
-              <div className="text-right">
-                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total</div>
-                <div className="text-xs text-teal-600 font-semibold">Value</div>
-              </div>
+              <span className="text-base">💰</span>
             </div>
-            <div className="space-y-1">
-              <h3 className="text-3xl font-bold text-gray-900">
-                ₹{(stats.totalValue / 1000).toFixed(0)}K
-              </h3>
-              <p className="text-sm text-gray-600">Inventory worth</p>
-            </div>
+            <h3 className="text-lg font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+              ₹{(stats.totalValue / 1000).toFixed(0)}K
+            </h3>
+            <p className="text-teal-600 font-semibold text-xs">Total Value</p>
           </div>
         </div>
       )}
 
       {/* Enhanced Search and Filters */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-        <div className="bg-gradient-to-r from-gray-50 to-slate-50 px-8 py-6 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="bg-gray-900 p-2 rounded-lg">
-              <Search className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">Search & Filter</h2>
-              <p className="text-sm text-gray-600">Find and filter your inventory items</p>
-            </div>
+      <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+        <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-4 border-b border-slate-200">
+          <div className="flex items-center space-x-2">
+            <Search className="h-5 w-5 text-slate-600" />
+            <h2 className="text-base font-bold text-slate-700">🔍 Search & Filter</h2>
           </div>
         </div>
         
-        <div className="p-8">
-          <div className="flex flex-col lg:flex-row gap-6">
+        <div className="p-5">
+          <div className="flex flex-col lg:flex-row gap-4">
             {/* Enhanced Search */}
             <form onSubmit={handleSearch} className="flex-1">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <input
                   type="text"
-                  placeholder="Search products, SKUs, categories..."
+                  placeholder="🔍 Search products, SKUs, categories..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:border-gray-900 focus:ring-4 focus:ring-gray-100 focus:outline-none text-base transition-all duration-200 bg-gray-50 hover:bg-white"
+                  className="w-full pl-9 pr-3 py-2 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none text-sm transition-all duration-300 bg-slate-50 hover:bg-white"
                 />
               </div>
             </form>
             
             {/* Enhanced Filters */}
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-3">
               <select
                 value={localFilters.sortBy || 'createdAt'}
                 onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-gray-900 focus:ring-4 focus:ring-gray-100 focus:outline-none text-sm bg-white hover:border-gray-300 transition-all duration-200 min-w-[160px]"
+                className="px-3 py-2 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none text-sm bg-slate-50 hover:bg-white transition-all duration-300"
               >
-                <option value="createdAt">Sort by Date</option>
-                <option value="quantityAvailable">Sort by Stock</option>
-                <option value="product.name">Sort by Name</option>
+                <option value="createdAt">📅 Sort by Date</option>
+                <option value="quantityAvailable">📊 Sort by Stock</option>
+                <option value="product.name">📝 Sort by Name</option>
               </select>
               
               <select
                 value={localFilters.sortOrder || 'desc'}
                 onChange={(e) => handleFilterChange('sortOrder', e.target.value)}
-                className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-gray-900 focus:ring-4 focus:ring-gray-100 focus:outline-none text-sm bg-white hover:border-gray-300 transition-all duration-200"
+                className="px-3 py-2 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none text-sm bg-slate-50 hover:bg-white transition-all duration-300"
               >
-                <option value="desc">Descending</option>
-                <option value="asc">Ascending</option>
+                <option value="desc">⬇️ Descending</option>
+                <option value="asc">⬆️ Ascending</option>
               </select>
 
-              <label className="flex items-center space-x-3 px-4 py-3 border-2 border-gray-200 rounded-xl bg-white hover:border-gray-300 transition-all duration-200 cursor-pointer">
+              <label className="flex items-center space-x-2 px-3 py-2 border-2 border-slate-200 rounded-lg bg-slate-50 hover:bg-white hover:border-slate-300 transition-all duration-300 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={localFilters.lowStock}
                   onChange={(e) => handleFilterChange('lowStock', e.target.checked)}
-                  className="rounded border-gray-300 text-gray-900 focus:ring-gray-500 w-4 h-4"
+                  className="rounded border-slate-300 text-slate-600 focus:ring-slate-500"
                 />
-                <span className="text-sm text-gray-700 font-medium">Low Stock Only</span>
+                <span className="text-sm text-slate-700 font-medium">⚠️ Low Stock Only</span>
               </label>
 
-              <label className="flex items-center space-x-3 px-4 py-3 border-2 border-gray-200 rounded-xl bg-white hover:border-gray-300 transition-all duration-200 cursor-pointer">
+              <label className="flex items-center space-x-2 px-3 py-2 border-2 border-slate-200 rounded-lg bg-slate-50 hover:bg-white hover:border-slate-300 transition-all duration-300 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={localFilters.outOfStock}
                   onChange={(e) => handleFilterChange('outOfStock', e.target.checked)}
-                  className="rounded border-gray-300 text-gray-900 focus:ring-gray-500 w-4 h-4"
+                  className="rounded border-slate-300 text-slate-600 focus:ring-slate-500"
                 />
-                <span className="text-sm text-gray-700 font-medium">Out of Stock Only</span>
+                <span className="text-sm text-slate-700 font-medium">❌ Out of Stock Only</span>
               </label>
               
               <button
@@ -569,9 +531,9 @@ export default function StockPage() {
                   });
                   setSearchTerm('');
                 }}
-                className="flex items-center space-x-2 px-4 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-all duration-200 text-sm font-medium"
+                className="flex items-center space-x-1 px-3 py-2 bg-gradient-to-r from-slate-500 to-blue-500 text-white rounded-lg hover:from-slate-600 hover:to-blue-600 transition-all duration-300 text-sm font-medium shadow-lg"
               >
-                <Filter className="h-4 w-4" />
+                <Filter className="h-3 w-3" />
                 <span>Clear All</span>
               </button>
             </div>
@@ -579,27 +541,27 @@ export default function StockPage() {
         </div>
       </div>
 
-      {/* Enhanced Professional Stock Table */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-        <div className="bg-gradient-to-r from-gray-50 to-slate-50 px-8 py-6 border-b border-gray-200">
+      {/* Enhanced Stock Table */}
+      <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+        <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-4 border-b border-slate-200">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-gray-900">
-                Stock Inventory
+              <h2 className="text-lg font-bold text-slate-700">
+                📦 Stock Inventory
               </h2>
-              <p className="text-gray-600 mt-1">
+              <p className="text-slate-600 text-sm">
                 {selectedItems.length > 0 && `${selectedItems.length} items selected • `}
                 {items.length} products • Page {pagination?.currentPage || 1} of {pagination?.totalPages || 1}
               </p>
             </div>
             {selectedItems.length > 0 && (
-              <div className="flex space-x-3">
-                <button className="flex items-center space-x-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl hover:from-blue-700 hover:to-indigo-800 transition-all duration-300 shadow-lg font-medium">
-                  <Upload className="h-4 w-4" />
+              <div className="flex space-x-2">
+                <button className="flex items-center space-x-1 px-3 py-2 bg-gradient-to-r from-slate-400 to-blue-500 text-white rounded-lg hover:from-slate-500 hover:to-blue-600 transition-all duration-300 shadow-lg text-xs font-medium">
+                  <Upload className="h-3 w-3" />
                   <span>Bulk Update</span>
                 </button>
-                <button className="flex items-center space-x-2 px-5 py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-xl hover:from-emerald-700 hover:to-teal-800 transition-all duration-300 shadow-lg font-medium">
-                  <Download className="h-4 w-4" />
+                <button className="flex items-center space-x-1 px-3 py-2 bg-gradient-to-r from-green-400 to-emerald-500 text-white rounded-lg hover:from-green-500 hover:to-emerald-600 transition-all duration-300 shadow-lg text-xs font-medium">
+                  <Download className="h-3 w-3" />
                   <span>Export Selected</span>
                 </button>
               </div>
@@ -609,22 +571,22 @@ export default function StockPage() {
 
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gradient-to-r from-gray-900 to-slate-800 text-white">
+            <thead className="bg-gradient-to-r from-slate-50 to-blue-50">
               <tr>
-                <th className="px-8 py-4 text-left">
+                <th className="px-4 py-3 text-left">
                   <input
                     type="checkbox"
                     checked={selectedItems.length === items.length && items.length > 0}
                     onChange={selectAllItems}
-                    className="rounded border-gray-300 text-gray-900 focus:ring-gray-500 h-4 w-4"
+                    className="rounded border-slate-300 text-slate-600 focus:ring-slate-500"
                   />
                 </th>
-                <th className="px-8 py-4 text-left text-sm font-semibold uppercase tracking-wider">Product Details</th>
-                <th className="px-8 py-4 text-left text-sm font-semibold uppercase tracking-wider">Stock Level</th>
-                <th className="px-8 py-4 text-left text-sm font-semibold uppercase tracking-wider">Status</th>
-                <th className="px-8 py-4 text-left text-sm font-semibold uppercase tracking-wider">Pricing</th>
-                <th className="px-8 py-4 text-left text-sm font-semibold uppercase tracking-wider">Last Updated</th>
-                <th className="px-8 py-4 text-right text-sm font-semibold uppercase tracking-wider">Actions</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">📦 Product Details</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">📊 Stock Level</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">🎯 Status</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">💰 Pricing</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">🕒 Last Updated</th>
+                <th className="px-4 py-3 text-right text-xs font-bold text-slate-700 uppercase tracking-wider">⚡ Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -658,8 +620,8 @@ export default function StockPage() {
                   return (
                     <tr 
                       key={item._id} 
-                      className={`hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 transition-all duration-200 ${
-                        selectedItems.includes(item._id) ? 'bg-gradient-to-r from-emerald-50 to-teal-50 border-l-4 border-emerald-500' : ''
+                      className={`hover:bg-gradient-to-r hover:from-slate-50 hover:to-blue-50 transition-all duration-300 ${
+                        selectedItems.includes(item._id) ? 'bg-gradient-to-r from-slate-50 to-blue-50 border-l-4 border-slate-500' : ''
                       }`}
                     >
                       <td className="px-4 py-3">
@@ -667,7 +629,7 @@ export default function StockPage() {
                           type="checkbox"
                           checked={selectedItems.includes(item._id)}
                           onChange={() => toggleItemSelection(item._id)}
-                          className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 h-4 w-4"
+                          className="rounded border-slate-300 text-slate-600 focus:ring-slate-500"
                         />
                       </td>
                       <td className="px-4 py-3">
@@ -680,8 +642,8 @@ export default function StockPage() {
                                 alt={item.product?.name || 'Product'} 
                               />
                             ) : (
-                              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center border-2 border-gray-200 shadow-sm">
-                                <Package2 className="h-5 w-5 text-gray-500" />
+                              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-slate-100 to-blue-100 flex items-center justify-center border-2 border-slate-200 shadow-lg">
+                                <Package2 className="h-5 w-5 text-slate-500" />
                               </div>
                             )}
                           </div>
@@ -725,26 +687,26 @@ export default function StockPage() {
                         </p>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end space-x-2">
+                        <div className="flex items-center justify-end space-x-1">
                           <button
                             onClick={() => openAdjustmentModal(item)}
-                            className="p-2 text-blue-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 rounded-lg transition-all duration-200 group"
+                            className="bg-gradient-to-r from-slate-400 to-blue-500 hover:from-slate-500 hover:to-blue-600 text-white p-1 rounded-lg transition-all duration-300 shadow-lg"
                             title="Adjust Stock"
                           >
-                            <Plus className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                            <Plus className="h-3 w-3" />
                           </button>
                           <button
                             onClick={() => openEditModal(item)}
-                            className="p-2 text-emerald-600 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 rounded-lg transition-all duration-200 group"
+                            className="bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white p-1 rounded-lg transition-all duration-300 shadow-lg"
                             title="Edit Item"
                           >
-                            <Edit3 className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                            <Edit3 className="h-3 w-3" />
                           </button>
                           <button
-                            className="p-2 text-gray-600 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 rounded-lg transition-all duration-200 group"
+                            className="bg-gradient-to-r from-slate-400 to-slate-500 hover:from-slate-500 hover:to-slate-600 text-white p-1 rounded-lg transition-all duration-300 shadow-lg"
                             title="View Details"
                           >
-                            <Eye className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                            <Eye className="h-3 w-3" />
                           </button>
                         </div>
                       </td>
@@ -758,20 +720,20 @@ export default function StockPage() {
 
         {/* Pagination */}
         {pagination && pagination.totalPages > 1 && (
-          <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 border-t-2 border-gray-200">
+          <div className="bg-gradient-to-r from-slate-50 to-blue-50 px-4 py-3 border-t border-slate-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <p className="text-sm text-gray-700 font-medium">
-                  Showing {((pagination.currentPage - 1) * pagination.limit) + 1} to {Math.min(pagination.currentPage * pagination.limit, pagination.totalCount)} of {pagination.totalCount} results
+                <p className="text-sm text-slate-700 font-medium">
+                  📄 Showing {((pagination.currentPage - 1) * pagination.limit) + 1} to {Math.min(pagination.currentPage * pagination.limit, pagination.totalCount)} of {pagination.totalCount} results
                 </p>
               </div>
               <div className="flex items-center space-x-1">
                 <button
                   onClick={() => handlePageChange(pagination.currentPage - 1)}
                   disabled={pagination.currentPage <= 1}
-                  className="px-3 py-1.5 text-sm font-medium text-gray-500 bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  className="px-3 py-1.5 text-sm font-medium bg-gradient-to-r from-slate-500 to-slate-600 text-white rounded-lg hover:from-slate-600 hover:to-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg"
                 >
-                  Previous
+                  ⬅️ Previous
                 </button>
                 
                 {[...Array(Math.min(5, pagination.totalPages))].map((_, i) => {
@@ -782,10 +744,10 @@ export default function StockPage() {
                     <button
                       key={pageNum}
                       onClick={() => handlePageChange(pageNum)}
-                      className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                      className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-300 shadow-lg ${
                         pageNum === pagination.currentPage
-                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30'
-                          : 'text-gray-500 bg-white border-2 border-gray-200 hover:bg-gray-50'
+                          ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white'
+                          : 'bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 hover:from-slate-200 hover:to-slate-300'
                       }`}
                     >
                       {pageNum}
@@ -796,9 +758,9 @@ export default function StockPage() {
                 <button
                   onClick={() => handlePageChange(pagination.currentPage + 1)}
                   disabled={pagination.currentPage >= pagination.totalPages}
-                  className="px-3 py-1.5 text-sm font-medium text-gray-500 bg-white border-2 border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  className="px-3 py-1.5 text-sm font-medium bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg"
                 >
-                  Next
+                  Next ➡️
                 </button>
               </div>
             </div>

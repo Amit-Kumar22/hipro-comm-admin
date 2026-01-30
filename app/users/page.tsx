@@ -98,7 +98,7 @@ export default function UsersPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-w-md w-full text-center">
           <div className="text-red-500 mb-4">
             <AlertCircle className="h-12 w-12 mx-auto" />
@@ -107,7 +107,7 @@ export default function UsersPage() {
           <p className="text-gray-600 mb-4">{error}</p>
           <button 
             onClick={handleRefresh}
-            className="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-md transition-colors"
+            className="bg-gradient-to-r from-slate-500 to-blue-500 hover:from-slate-600 hover:to-blue-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg"
           >
             Try Again
           </button>
@@ -117,151 +117,153 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 space-y-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
       {/* Professional Header */}
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Users Management</h1>
-              <p className="text-gray-600 text-sm mt-1">Manage user accounts, roles, and permissions</p>
-            </div>
-            <div className="flex items-center space-x-2 mt-3 sm:mt-0">
-              <button
-                onClick={handleRefresh}
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors text-sm"
-              >
-                <RefreshCw className="h-4 w-4" />
-                <span>Refresh</span>
-              </button>
-              <button className="flex items-center space-x-2 bg-gray-900 hover:bg-gray-800 text-white px-3 py-2 rounded-md transition-colors text-sm">
-                <Plus className="h-4 w-4" />
-                <span>Add User</span>
-              </button>
-            </div>
+      <div className="bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700 rounded-2xl shadow-xl shadow-gray-500/30 p-6 text-white">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Users Management</h1>
+            <p className="text-gray-100 text-base">Manage user accounts, roles, and permissions</p>
+          </div>
+          <div className="flex items-center space-x-2 mt-3 sm:mt-0">
+            <button
+              onClick={handleRefresh}
+              className="flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-3 py-2 rounded-lg hover:bg-white/30 transition-all duration-300 text-sm"
+            >
+              <RefreshCw className="h-4 w-4" />
+              <span className="font-medium">Refresh</span>
+            </button>
+            <button className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-indigo-600 px-3 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg text-sm">
+              <Plus className="h-4 w-4" />
+              <span className="font-medium">Add User</span>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Compact Stats Cards */}
+      {/* Enhanced Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3">
+        <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-lg shadow-xl shadow-slate-500/20 border-2 border-slate-200/50 p-3 hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between mb-2">
-            <div className="bg-gray-100 text-gray-700 p-2 rounded-md">
+            <div className="bg-gradient-to-r from-slate-500 to-slate-600 text-white p-2 rounded-lg shadow-lg shadow-slate-500/30">
               <Users className="h-4 w-4" />
             </div>
+            <span className="text-base">👥</span>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-bold bg-gradient-to-r from-slate-600 to-slate-700 bg-clip-text text-transparent">
             {stats.total.toLocaleString()}
           </h3>
-          <p className="text-gray-600 text-xs">Total Users</p>
+          <p className="text-slate-600 font-semibold text-xs">Total Users</p>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-xl shadow-blue-500/20 border-2 border-blue-200/50 p-3 hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between mb-2">
-            <div className="bg-gray-100 text-gray-700 p-2 rounded-md">
+            <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-2 rounded-lg shadow-lg shadow-blue-500/30">
               <UserCheck className="h-4 w-4" />
             </div>
+            <span className="text-base">🛍️</span>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             {stats.customers.toLocaleString()}
           </h3>
-          <p className="text-gray-600 text-xs">Customers</p>
+          <p className="text-blue-600 font-semibold text-xs">Customers</p>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3">
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg shadow-xl shadow-purple-500/20 border-2 border-purple-200/50 p-3 hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between mb-2">
-            <div className="bg-gray-100 text-gray-700 p-2 rounded-md">
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-2 rounded-lg shadow-lg shadow-purple-500/30">
               <Crown className="h-4 w-4" />
             </div>
+            <span className="text-base">👑</span>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             {stats.admins.toLocaleString()}
           </h3>
-          <p className="text-gray-600 text-xs">Admins</p>
+          <p className="text-purple-600 font-semibold text-xs">Admins</p>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3">
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-xl shadow-green-500/20 border-2 border-green-200/50 p-3 hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between mb-2">
-            <div className="bg-gray-100 text-gray-700 p-2 rounded-md">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-2 rounded-lg shadow-lg shadow-green-500/30">
               <Shield className="h-4 w-4" />
             </div>
+            <span className="text-base">✅</span>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
             {stats.verified.toLocaleString()}
           </h3>
-          <p className="text-gray-600 text-xs">Verified</p>
+          <p className="text-green-600 font-semibold text-xs">Verified</p>
         </div>
       </div>
 
-      {/* Compact Filters */}
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
-        <div className="p-4 border-b border-gray-200">
+      {/* Enhanced Filters */}
+      <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg">
+        <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-4 border-b border-slate-200">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center space-x-2 mb-3 sm:mb-0">
-              <Filter className="h-4 w-4 text-gray-500" />
-              <h2 className="text-sm font-medium text-gray-900">Filters & Search</h2>
+              <Filter className="h-5 w-5 text-slate-600" />
+              <h2 className="text-base font-bold text-slate-700">🔍 Filters & Search</h2>
             </div>
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setViewMode(viewMode === 'table' ? 'grid' : 'table')}
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors text-sm"
+                className="flex items-center space-x-1 bg-gradient-to-r from-slate-100 to-blue-100 text-slate-700 px-3 py-2 rounded-lg hover:from-slate-200 hover:to-blue-200 transition-all duration-300 text-sm"
               >
-                <Eye className="h-4 w-4" />
-                <span>Grid View</span>
+                <Eye className="h-3 w-3" />
+                <span className="font-medium">Grid View</span>
               </button>
-              <button className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors text-sm">
-                <Download className="h-4 w-4" />
-                <span>Export</span>
+              <button className="flex items-center space-x-1 bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 px-3 py-2 rounded-lg hover:from-slate-200 hover:to-slate-300 transition-all duration-300 text-sm">
+                <Download className="h-3 w-3" />
+                <span className="font-medium">Export</span>
               </button>
             </div>
           </div>
         </div>
         
-        <div className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="p-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <form onSubmit={handleSearchSubmit} className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search by name, email..."
+                placeholder="🔍 Search by name, email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent bg-white"
+                className="w-full pl-9 pr-3 py-2 border-2 border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-slate-50 hover:bg-white"
               />
             </form>
             
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent bg-white"
+              className="px-3 py-2 border-2 border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-slate-50 hover:bg-white"
             >
-              <option value="all">All Roles</option>
-              <option value="customer">Customers</option>
-              <option value="admin">Admins</option>
+              <option value="all">👥 All Roles</option>
+              <option value="customer">🛍️ Customers</option>
+              <option value="admin">👑 Admins</option>
             </select>
 
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent bg-white"
+              className="px-3 py-2 border-2 border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-slate-50 hover:bg-white"
             >
-              <option value="all">All Status</option>
-              <option value="verified">Verified</option>
-              <option value="unverified">Unverified</option>
+              <option value="all">📊 All Status</option>
+              <option value="verified">✅ Verified</option>
+              <option value="unverified">❌ Unverified</option>
             </select>
           </div>
 
           {selectedUsers.length > 0 && (
-            <div className="mt-3 flex items-center justify-between bg-gray-50 p-3 rounded-md border border-gray-200">
-              <span className="text-gray-700 text-sm font-medium">
+            <div className="mt-4 flex items-center justify-between bg-gradient-to-r from-slate-50 to-blue-50 p-3 rounded-lg border-2 border-slate-200/50">
+              <span className="text-slate-700 font-medium text-sm">
                 {selectedUsers.length} user(s) selected
               </span>
               <div className="flex space-x-2">
-                <button className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-md transition-colors text-sm">
+                <button className="bg-gradient-to-r from-red-400 to-pink-500 text-white px-3 py-1 rounded-lg hover:from-red-500 hover:to-pink-600 transition-all duration-300 shadow-lg text-xs font-medium">
                   Delete Selected
                 </button>
-                <button className="bg-gray-900 hover:bg-gray-800 text-white px-3 py-1.5 rounded-md transition-colors text-sm">
+                <button className="bg-gradient-to-r from-slate-400 to-blue-500 text-white px-3 py-1 rounded-lg hover:from-slate-500 hover:to-blue-600 transition-all duration-300 shadow-lg text-xs font-medium">
                   Bulk Actions
                 </button>
               </div>
@@ -270,19 +272,19 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* Compact Users Table */}
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-gray-200">
+      {/* Enhanced Users Table */}
+      <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+        <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-4 border-b border-slate-200">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
-              <Users className="h-4 w-4 text-gray-500" />
-              <h3 className="text-sm font-medium text-gray-900">
-                Users List ({usersPagination?.totalCount || 0})
+              <Users className="h-5 w-5 text-slate-600" />
+              <h3 className="text-base font-bold text-slate-700">
+                👥 Users List ({usersPagination?.totalCount || 0})
               </h3>
             </div>
             {loading && (
-              <div className="flex items-center text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
-                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600 mr-2"></div>
+              <div className="flex items-center text-sm text-slate-600 bg-slate-50 px-3 py-1 rounded-lg">
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-slate-600 mr-2"></div>
                 <span>Loading...</span>
               </div>
             )}
@@ -291,27 +293,27 @@ export default function UsersPage() {
 
         <div className="overflow-x-auto">
           <table className="min-w-full">
-            <thead className="bg-gray-50">
+            <thead className="bg-gradient-to-r from-slate-50 to-blue-50">
               <tr>
-                <th className="px-4 py-2 text-left">
+                <th className="px-4 py-3 text-left">
                   <input
                     type="checkbox"
                     checked={selectedUsers.length === users.length && users.length > 0}
                     onChange={selectAllUsers}
-                    className="rounded border-gray-300 text-gray-900 shadow-sm focus:border-gray-900 focus:ring focus:ring-gray-200"
+                    className="rounded border-slate-300 text-slate-600 shadow-sm focus:border-slate-300 focus:ring focus:ring-slate-200"
                   />
                 </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  User Details
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  👤 User Details
                 </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Role & Status
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  🔐 Role & Status
                 </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Joined Date
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  📅 Joined Date
                 </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Actions
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  ⚡ Actions
                 </th>
               </tr>
             </thead>
@@ -350,18 +352,18 @@ export default function UsersPage() {
                 ))
               ) : users.length > 0 ? (
                 users.map((user) => (
-                  <tr key={user._id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={user._id} className="hover:bg-gradient-to-r hover:from-slate-50 hover:to-blue-50 transition-all duration-300">
                     <td className="px-4 py-3">
                       <input
                         type="checkbox"
                         checked={selectedUsers.includes(user._id)}
                         onChange={() => toggleUserSelection(user._id)}
-                        className="rounded border-gray-300 text-gray-900 shadow-sm focus:border-gray-900 focus:ring focus:ring-gray-200"
+                        className="rounded border-slate-300 text-slate-600 shadow-sm focus:border-slate-300 focus:ring focus:ring-slate-200"
                       />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center space-x-3">
-                        <div className="h-8 w-8 bg-gray-700 rounded-full flex items-center justify-center">
+                        <div className="h-8 w-8 bg-gradient-to-br from-slate-500 to-blue-500 rounded-full flex items-center justify-center shadow-lg border-2 border-slate-200">
                           <span className="text-white font-medium text-sm">
                             {user.name.charAt(0).toUpperCase()}
                           </span>
@@ -416,17 +418,17 @@ export default function UsersPage() {
                         <select
                           value={user.role}
                           onChange={(e) => handleRoleChange(user._id, e.target.value as 'customer' | 'admin')}
-                          className="text-xs border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
+                          className="text-xs border-2 border-slate-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 hover:bg-white transition-all duration-300"
                           disabled={loading}
                         >
-                          <option value="customer">Customer</option>
-                          <option value="admin">Admin</option>
+                          <option value="customer">🛍️ Customer</option>
+                          <option value="admin">👑 Admin</option>
                         </select>
                         {user.role !== 'admin' && (
                           <button
                             onClick={() => handleDeleteUser(user._id, user.name)}
                             disabled={loading}
-                            className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded-md transition-colors disabled:opacity-50 text-xs"
+                            className="bg-gradient-to-r from-red-400 to-pink-500 hover:from-red-500 hover:to-pink-600 text-white p-1 rounded-lg transition-all duration-300 shadow-lg disabled:opacity-50"
                           >
                             <Trash2 className="h-3 w-3" />
                           </button>
@@ -452,11 +454,11 @@ export default function UsersPage() {
 
         {/* Compact Pagination */}
         {usersPagination && usersPagination.totalPages > 1 && (
-          <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
+          <div className="bg-gradient-to-r from-slate-50 to-blue-50 px-4 py-3 border-t border-slate-200">
             <div className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
-              <div className="text-xs text-gray-700">
-                Page {usersPagination.currentPage} of {usersPagination.totalPages} 
-                <span className="text-gray-600 ml-2">
+              <div className="text-xs text-slate-700 font-medium">
+                📄 Page {usersPagination.currentPage} of {usersPagination.totalPages} 
+                <span className="text-slate-600 ml-2">
                   ({usersPagination.totalCount} total users)
                 </span>
               </div>
@@ -464,16 +466,16 @@ export default function UsersPage() {
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={!usersPagination.hasPrev}
-                  className="bg-gray-900 hover:bg-gray-800 text-white px-3 py-1.5 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs"
+                  className="bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white px-3 py-1.5 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-xs font-medium shadow-lg"
                 >
-                  Previous
+                  ⬅️ Previous
                 </button>
                 <button
                   onClick={() => setCurrentPage(prev => prev + 1)}
                   disabled={!usersPagination.hasNext}
-                  className="bg-gray-900 hover:bg-gray-800 text-white px-3 py-1.5 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs"
+                  className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-3 py-1.5 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-xs font-medium shadow-lg"
                 >
-                  Next
+                  Next ➡️
                 </button>
               </div>
             </div>

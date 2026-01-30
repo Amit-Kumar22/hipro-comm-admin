@@ -127,13 +127,13 @@ export default function AdminCategoriesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-6">
       {/* Compact Header */}
-      <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-2xl shadow-xl shadow-orange-500/30 p-6 text-white">
+      <div className="bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700 rounded-2xl shadow-xl shadow-gray-500/30 p-6 text-white">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-1">📂 Categories Management</h1>
-            <p className="text-orange-100 text-base">Organize your product categories</p>
+            <p className="text-gray-100 text-base">Organize your product categories</p>
           </div>
           <div className="flex items-center space-x-3 mt-4 lg:mt-0">
             <button
@@ -143,13 +143,13 @@ export default function AdminCategoriesPage() {
               <RefreshCw className="h-4 w-4" />
               <span className="font-medium">Refresh</span>
             </button>
-            <button className="flex items-center space-x-2 bg-gradient-to-r from-green-400 to-emerald-500 px-3 py-2 rounded-lg hover:from-green-500 hover:to-emerald-600 transition-all duration-300 shadow-lg text-sm">
+            <button className="flex items-center space-x-2 bg-gradient-to-r from-slate-400 to-slate-500 px-3 py-2 rounded-lg hover:from-slate-500 hover:to-slate-600 transition-all duration-300 shadow-lg text-sm">
               <Upload className="h-4 w-4" />
               <span className="font-medium">Import</span>
             </button>
             <button
               onClick={handleAddCategory}
-              className="flex items-center space-x-2 bg-gradient-to-r from-blue-400 to-indigo-500 px-3 py-2 rounded-lg hover:from-blue-500 hover:to-indigo-600 transition-all duration-300 shadow-lg text-sm"
+              className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-indigo-600 px-3 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg text-sm"
             >
               <Plus className="h-4 w-4" />
               <span className="font-medium">Add Category</span>
@@ -160,17 +160,17 @@ export default function AdminCategoriesPage() {
 
       {/* Compact Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-xl shadow-blue-500/20 border-2 border-blue-200/50 p-3 hover:scale-105 transition-all duration-300">
+        <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-lg shadow-xl shadow-slate-500/20 border-2 border-slate-200/50 p-3 hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between mb-2">
-            <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-2 rounded-lg shadow-lg shadow-blue-500/30">
+            <div className="bg-gradient-to-r from-slate-500 to-slate-600 text-white p-2 rounded-lg shadow-lg shadow-slate-500/30">
               <Folder className="h-4 w-4" />
             </div>
             <span className="text-base">📂</span>
           </div>
-          <h3 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h3 className="text-lg font-bold bg-gradient-to-r from-slate-600 to-slate-700 bg-clip-text text-transparent">
             {stats.total}
           </h3>
-          <p className="text-blue-600 font-semibold text-xs">Total Categories</p>
+          <p className="text-slate-600 font-semibold text-xs">Total Categories</p>
         </div>
 
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-xl shadow-green-500/20 border-2 border-green-200/50 p-3 hover:scale-105 transition-all duration-300">
@@ -199,36 +199,36 @@ export default function AdminCategoriesPage() {
           <p className="text-red-600 font-semibold text-xs">Inactive</p>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg shadow-xl shadow-purple-500/20 border-2 border-purple-200/50 p-3 hover:scale-105 transition-all duration-300">
+        <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-lg shadow-xl shadow-slate-500/20 border-2 border-slate-200/50 p-3 hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between mb-2">
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-2 rounded-lg shadow-lg shadow-purple-500/30">
+            <div className="bg-gradient-to-r from-slate-500 to-blue-500 text-white p-2 rounded-lg shadow-lg shadow-slate-500/30">
               <Eye className="h-4 w-4" />
             </div>
             <span className="text-base">🖼️</span>
           </div>
-          <h3 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h3 className="text-lg font-bold bg-gradient-to-r from-slate-600 to-blue-600 bg-clip-text text-transparent">
             {stats.withImages}
           </h3>
-          <p className="text-purple-600 font-semibold text-xs">With Images</p>
+          <p className="text-slate-600 font-semibold text-xs">With Images</p>
         </div>
       </div>
 
       {/* Compact Filters */}
-      <div className="bg-white rounded-xl shadow-xl shadow-gray-500/10 border-2 border-gray-200/50 p-5">
+      <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg p-5">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4">
           <div className="flex items-center space-x-2 mb-3 lg:mb-0">
-            <Filter className="h-5 w-5 text-orange-600" />
+            <Filter className="h-5 w-5 text-slate-600" />
             <h2 className="text-lg font-bold text-gray-900">Filters & Search</h2>
           </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setViewMode(viewMode === 'table' ? 'grid' : 'table')}
-              className="flex items-center space-x-1 bg-gradient-to-r from-orange-100 to-amber-100 text-orange-700 px-3 py-2 rounded-lg hover:from-orange-200 hover:to-amber-200 transition-all duration-300 text-sm"
+              className="flex items-center space-x-1 bg-gradient-to-r from-slate-100 to-blue-100 text-slate-700 px-3 py-2 rounded-lg hover:from-slate-200 hover:to-blue-200 transition-all duration-300 text-sm"
             >
               {viewMode === 'table' ? <Grid3X3 className="h-3 w-3" /> : <List className="h-3 w-3" />}
               <span className="font-medium">{viewMode === 'table' ? 'Grid' : 'Table'}</span>
             </button>
-            <button className="flex items-center space-x-1 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 px-3 py-2 rounded-lg hover:from-green-200 hover:to-emerald-200 transition-all duration-300 text-sm">
+            <button className="flex items-center space-x-1 bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 px-3 py-2 rounded-lg hover:from-slate-200 hover:to-slate-300 transition-all duration-300 text-sm">
               <Download className="h-3 w-3" />
               <span className="font-medium">Export</span>
             </button>
@@ -243,35 +243,35 @@ export default function AdminCategoriesPage() {
               placeholder="Search categories..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 bg-gray-50 hover:bg-white"
+              className="w-full pl-9 pr-3 py-2 border-2 border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-slate-50 hover:bg-white"
             />
           </div>
           
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 bg-gray-50 hover:bg-white"
+            className="px-3 py-2 border-2 border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-slate-50 hover:bg-white"
           >
             <option value="all">📊 All Status</option>
             <option value="active">✅ Active</option>
             <option value="inactive">❌ Inactive</option>
           </select>
 
-          <button className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-3 py-2 rounded-lg hover:from-orange-600 hover:to-amber-600 transition-all duration-300 shadow-lg font-medium text-sm">
+          <button className="bg-gradient-to-r from-slate-500 to-blue-500 text-white px-3 py-2 rounded-lg hover:from-slate-600 hover:to-blue-600 transition-all duration-300 shadow-lg font-medium text-sm">
             🔍 Advanced Search
           </button>
         </div>
 
         {selectedCategories.length > 0 && (
-          <div className="mt-4 flex items-center justify-between bg-gradient-to-r from-orange-50 to-amber-50 p-3 rounded-lg border-2 border-orange-200/50">
-            <span className="text-orange-700 font-medium text-sm">
+          <div className="mt-4 flex items-center justify-between bg-gradient-to-r from-slate-50 to-blue-50 p-3 rounded-lg border-2 border-slate-200/50">
+            <span className="text-slate-700 font-medium text-sm">
               {selectedCategories.length} category(ies) selected
             </span>
             <div className="flex space-x-2">
               <button className="bg-gradient-to-r from-red-400 to-pink-500 text-white px-3 py-1 rounded-lg hover:from-red-500 hover:to-pink-600 transition-all duration-300 shadow-lg text-xs font-medium">
                 Delete Selected
               </button>
-              <button className="bg-gradient-to-r from-blue-400 to-indigo-500 text-white px-3 py-1 rounded-lg hover:from-blue-500 hover:to-indigo-600 transition-all duration-300 shadow-lg text-xs font-medium">
+              <button className="bg-gradient-to-r from-slate-400 to-blue-500 text-white px-3 py-1 rounded-lg hover:from-slate-500 hover:to-blue-600 transition-all duration-300 shadow-lg text-xs font-medium">
                 Bulk Edit
               </button>
             </div>
@@ -280,18 +280,18 @@ export default function AdminCategoriesPage() {
       </div>
 
       {/* Compact Categories Table */}
-      <div className="bg-white rounded-xl shadow-xl shadow-gray-500/10 border-2 border-gray-200/50 overflow-hidden">
-        <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 border-b-2 border-gray-200/50">
+      <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+        <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-4 border-b border-slate-200">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
-              <Folder className="h-5 w-5 text-orange-600" />
+              <Folder className="h-5 w-5 text-slate-600" />
               <h3 className="text-lg font-bold text-gray-900">
                 📂 Categories ({filteredCategories.length})
               </h3>
             </div>
             {loading && (
-              <div className="flex items-center text-sm text-orange-600 bg-orange-50 px-3 py-1 rounded-lg">
-                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-orange-600 mr-2"></div>
+              <div className="flex items-center text-sm text-slate-600 bg-slate-50 px-3 py-1 rounded-lg">
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-slate-600 mr-2"></div>
                 <span className="font-medium">Loading...</span>
               </div>
             )}
@@ -300,29 +300,29 @@ export default function AdminCategoriesPage() {
 
         <div className="overflow-x-auto">
           <table className="min-w-full">
-            <thead className="bg-gradient-to-r from-orange-50 to-amber-50">
+            <thead className="bg-gradient-to-r from-slate-50 to-blue-50">
               <tr>
                 <th className="px-4 py-3 text-left">
                   <input
                     type="checkbox"
                     checked={selectedCategories.length === filteredCategories.length && filteredCategories.length > 0}
                     onChange={selectAllCategories}
-                    className="rounded border-gray-300 text-orange-600 shadow-sm focus:border-orange-300 focus:ring focus:ring-orange-200"
+                    className="rounded border-slate-300 text-slate-600 shadow-sm focus:border-slate-300 focus:ring focus:ring-slate-200"
                   />
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-orange-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
                   📂 Category Details
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-orange-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
                   🌐 Slug
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-orange-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
                   📊 Status
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-orange-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
                   🖼️ Image
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-orange-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
                   ⚡ Actions
                 </th>
               </tr>
@@ -362,13 +362,13 @@ export default function AdminCategoriesPage() {
                 ))
               ) : filteredCategories.length > 0 ? (
                 filteredCategories.map((category) => (
-                  <tr key={category._id} className="hover:bg-gradient-to-r hover:from-orange-50 hover:to-amber-50 transition-all duration-300">
+                  <tr key={category._id} className="hover:bg-gradient-to-r hover:from-slate-50 hover:to-blue-50 transition-all duration-300">
                     <td className="px-4 py-3">
                       <input
                         type="checkbox"
                         checked={selectedCategories.includes(category._id)}
                         onChange={() => toggleCategorySelection(category._id)}
-                        className="rounded border-gray-300 text-orange-600 shadow-sm focus:border-orange-300 focus:ring focus:ring-orange-200"
+                        className="rounded border-slate-300 text-slate-600 shadow-sm focus:border-slate-300 focus:ring focus:ring-slate-200"
                       />
                     </td>
                     <td className="px-4 py-3">
@@ -377,10 +377,10 @@ export default function AdminCategoriesPage() {
                           <img 
                             src={category.image} 
                             alt={category.name}
-                            className="h-10 w-10 rounded-lg object-cover shadow-lg border-2 border-orange-200"
+                            className="h-10 w-10 rounded-lg object-cover shadow-lg border-2 border-slate-200"
                           />
                         ) : (
-                          <div className="h-10 w-10 bg-gradient-to-br from-orange-100 to-amber-100 rounded-lg flex items-center justify-center text-lg border-2 border-orange-200 shadow-lg">
+                          <div className="h-10 w-10 bg-gradient-to-br from-slate-100 to-blue-100 rounded-lg flex items-center justify-center text-lg border-2 border-slate-200 shadow-lg">
                             📂
                           </div>
                         )}
@@ -428,11 +428,11 @@ export default function AdminCategoriesPage() {
                       <div className="flex items-center space-x-1">
                         <button
                           onClick={() => handleEditCategory(category)}
-                          className="bg-gradient-to-r from-blue-400 to-indigo-500 hover:from-blue-500 hover:to-indigo-600 text-white p-1 rounded-lg transition-all duration-300 shadow-lg"
+                          className="bg-gradient-to-r from-slate-400 to-blue-500 hover:from-slate-500 hover:to-blue-600 text-white p-1 rounded-lg transition-all duration-300 shadow-lg"
                         >
                           <Edit3 className="h-3 w-3" />
                         </button>
-                        <button className="bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white p-1 rounded-lg transition-all duration-300 shadow-lg">
+                        <button className="bg-gradient-to-r from-slate-400 to-slate-500 hover:from-slate-500 hover:to-slate-600 text-white p-1 rounded-lg transition-all duration-300 shadow-lg">
                           <Eye className="h-3 w-3" />
                         </button>
                         <button
@@ -455,7 +455,7 @@ export default function AdminCategoriesPage() {
                     <p className="text-gray-600 mb-3 text-sm">Try adjusting your search or add some categories</p>
                     <button
                       onClick={handleAddCategory}
-                      className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-lg hover:from-orange-600 hover:to-amber-600 transition-all duration-300 shadow-lg text-sm"
+                      className="bg-gradient-to-r from-slate-500 to-blue-500 text-white px-4 py-2 rounded-lg hover:from-slate-600 hover:to-blue-600 transition-all duration-300 shadow-lg text-sm"
                     >
                       Add Your First Category
                     </button>

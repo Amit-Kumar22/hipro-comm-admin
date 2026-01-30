@@ -60,10 +60,10 @@ export default function OrdersTable() {
 
   if (loading && orders.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border p-3">
-        <div className="animate-pulse space-y-2">
+      <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg p-4">
+        <div className="animate-pulse space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-12 bg-gray-200 rounded"></div>
+            <div key={i} className="h-12 bg-gradient-to-r from-slate-100 to-blue-100 rounded-lg"></div>
           ))}
         </div>
       </div>
@@ -72,10 +72,10 @@ export default function OrdersTable() {
 
   if (!loading && orders.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
-        <div className="text-4xl mb-2">�</div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">No Orders Found</h3>
-        <p className="text-sm text-gray-600">
+      <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg p-6 text-center">
+        <div className="text-4xl mb-2">📋</div>
+        <h3 className="text-lg font-semibold text-slate-700 mb-1">No Orders Found</h3>
+        <p className="text-sm text-slate-600">
           {Object.keys(filters).length > 0 
             ? 'No orders match your current filters.' 
             : 'No orders have been placed yet.'}
@@ -85,257 +85,10 @@ export default function OrdersTable() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow border overflow-hidden">
-      {/* Compact Header */}
-      <div className="px-3 py-2 border-b bg-gray-800">
-        <div className="flex justify-between items-center">
-          <div>
-            <h3 className="text-sm font-bold text-white">
-              Orders ({pagination?.total || 0})
-            </h3>
-          </div>
-          {selectedOrders.length > 0 && (
-            <div className="flex items-center space-x-2">
-              <span className="text-xs text-white bg-blue-600 px-2 py-1 rounded">
-                {selectedOrders.length} selected
-              </span>
-              <button className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
-                Actions
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Compact Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-xs">
-          <thead className="bg-gray-700">
-            <tr>
-              <th className="px-2 py-2 text-left text-xs font-semibold text-white">
-                <input
-                  type="checkbox"
-                  className="rounded text-blue-600 w-3 h-3"
-                  onChange={(e) =>
-                    setSelectedOrders(e.target.checked ? orders.map(o => o._id) : [])
-                  }
-                />
-              </th>
-              <th className="px-2 py-2 text-left text-xs font-semibold text-white">Order</th>
-              <th className="px-2 py-2 text-left text-xs font-semibold text-white">Customer</th>
-              <th className="px-2 py-2 text-left text-xs font-semibold text-white">Items</th>
-              <th className="px-2 py-2 text-left text-xs font-semibold text-white">Amount</th>
-              <th className="px-2 py-2 text-left text-xs font-semibold text-white w-24">Status</th>
-              <th className="px-2 py-2 text-left text-xs font-semibold text-white">Date</th>
-              <th className="px-2 py-2 text-left text-xs font-semibold text-white">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white">
-            {orders.map((order, index) => (
-              <React.Fragment key={order._id}>
-                <tr className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-blue-50`}>
-                  <td className="px-2 py-2">
-                    <input
-                      type="checkbox"
-                      className="rounded text-blue-600 w-3 h-3"
-                      checked={selectedOrders.includes(order._id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedOrders([...selectedOrders, order._id]);
-                        } else {
-                          setSelectedOrders(selectedOrders.filter(id => id !== order._id));
-                        }
-                      }}
-                    />
-                  </td>
-                  <td className="px-2 py-2">
-                    <div className="text-xs">
-                      <div className="font-bold text-gray-900">{order.orderNumber}</div>
-                      <div className="text-gray-600">#{order._id.slice(-6)}</div>
-                      {checkStockStatus(order.items || []) && (
-                        <div className="text-red-600 font-medium">⚠️ Low Stock</div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-2 py-2">
-                    <div className="text-xs">
-                      <div className="font-semibold text-gray-900">{order.user?.name || 'N/A'}</div>
-                      <div className="text-gray-600">{order.user?.email || 'N/A'}</div>
-                    </div>
-                  </td>
-                  <td className="px-2 py-2">
-                    <div className="text-xs">
-                      <div className="font-semibold text-gray-900">
-                        {order.items?.length || 0} items
-                      </div>
-                      <div className="text-gray-600">
-                        Qty: {order.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0}
-                      </div>
-                      {order.items && order.items.length > 0 && (
-                        <button
-                          onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
-                          className="text-blue-600 hover:text-blue-800 font-medium"
-                        >
-                          {expandedOrder === order._id ? '▲' : '▼'} View
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-2 py-2">
-                    <div className="text-xs">
-                      <div className="font-bold text-gray-900">₹{order.totals?.total?.toFixed(2) || '0.00'}</div>
-                      <div className={`px-1 py-0.5 rounded text-xs ${getPaymentBadge(order.paymentMethod, order.paymentStatus)}`}>
-                        {order.paymentMethod === 'cod' ? 'COD' : 'Online'}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-2 py-2 w-24">
-                    <div className="space-y-1">
-                      <select
-                        value={order.status}
-                        onChange={(e) => handleStatusUpdate(order._id, e.target.value)}
-                        disabled={updating}
-                        className="w-20 text-xs border border-gray-300 rounded px-1 py-1 bg-white text-gray-900 font-medium focus:border-blue-500"
-                      >
-                        <option value="PENDING">Pending</option>
-                        <option value="PAID">Paid</option>
-                        <option value="SHIPPED">Shipped</option>
-                        <option value="DELIVERED">Delivered</option>
-                        <option value="CANCELLED">Cancelled</option>
-                      </select>
-                      <div>
-                        <span className={`inline-block px-1 py-0.5 rounded text-xs font-medium ${getStatusBadge(order.status)}`}>
-                          {order.status}
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-2 py-2 text-xs font-medium text-gray-900">
-                    <div>{new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</div>
-                    <div className="text-gray-600">{new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
-                  </td>
-                  <td className="px-2 py-2">
-                    <div className="flex space-x-1">
-                      <button 
-                        onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
-                        className="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded hover:bg-blue-200"
-                      >
-                        {expandedOrder === order._id ? 'Hide' : 'View'}
-                      </button>
-                      <button 
-                        onClick={() => setTrackingModal({ isOpen: true, order })}
-                        className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded hover:bg-green-200"
-                      >
-                        Track
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                {/* Compact Expanded Order Details */}
-                {expandedOrder === order._id && (
-                  <tr>
-                    <td colSpan={8} className="px-3 py-2 bg-gray-50 border-l-2 border-blue-500">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {/* Order Items */}
-                        <div>
-                          <h5 className="text-xs font-bold text-gray-900 mb-1">Items ({order.items?.length || 0})</h5>
-                          <div className="space-y-1 max-h-32 overflow-y-auto">
-                            {order.items?.map((item: any, index: number) => (
-                              <div key={index} className="flex items-center space-x-2 p-1 bg-white rounded text-xs">
-                                {item.product?.images?.[0] && (
-                                  <img
-                                    src={item.product.images[0].url}
-                                    alt={item.product.images[0].alt}
-                                    className="w-8 h-8 rounded object-cover"
-                                  />
-                                )}
-                                <div className="flex-1 min-w-0">
-                                  <div className="font-medium text-gray-900 truncate">{item.name}</div>
-                                  <div className="text-gray-600">
-                                    {item.sku} | Qty: {item.quantity} | ₹{item.price}
-                                  </div>
-                                  <div className="flex space-x-1">
-                                    <span className={`px-1 py-0.5 rounded text-xs ${
-                                      item.product?.inventory?.available > 10 ? 'bg-green-100 text-green-800' 
-                                      : item.product?.inventory?.available > 0 ? 'bg-yellow-100 text-yellow-800'
-                                      : 'bg-red-100 text-red-800'
-                                    }`}>
-                                      Stock: {item.product?.inventory?.available || 'N/A'}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="text-xs font-bold">₹{item.total}</div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        {/* Shipping & Actions */}
-                        <div>
-                          <h5 className="text-xs font-bold text-gray-900 mb-1">Shipping & Actions</h5>
-                          <div className="p-2 bg-white rounded text-xs mb-2">
-                            <div>{order.shippingAddress?.street}</div>
-                            <div>{order.shippingAddress?.city}, {order.shippingAddress?.state} {order.shippingAddress?.pincode}</div>
-                            {order.shippingAddress?.phone && <div>📱 {order.shippingAddress.phone}</div>}
-                          </div>
-                          <div className="grid grid-cols-2 gap-1">
-                            <button className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700">
-                              Update Status
-                            </button>
-                            <button className="px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700">
-                              Reserve Stock
-                            </button>
-                            <button className="px-2 py-1 bg-yellow-600 text-white rounded text-xs hover:bg-yellow-700">
-                              Check Inventory
-                            </button>
-                            <button className="px-2 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700">
-                              Invoice
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Compact Pagination */}
-      {pagination && pagination.pages > 1 && (
-        <div className="px-3 py-2 border-t bg-gray-50">
-          <div className="flex justify-between items-center">
-            <div className="text-xs text-gray-700">
-              {((pagination.page - 1) * 20) + 1}-{Math.min(pagination.page * 20, pagination.total)} of {pagination.total}
-            </div>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => handlePageChange(pagination.page - 1)}
-                disabled={pagination.page <= 1}
-                className="px-2 py-1 text-xs border rounded hover:bg-gray-100 disabled:opacity-50"
-              >
-                ← Prev
-              </button>
-              <span className="px-2 py-1 text-xs bg-blue-600 text-white rounded">
-                {pagination.page}/{pagination.pages}
-              </span>
-              <button
-                onClick={() => handlePageChange(pagination.page + 1)}
-                disabled={pagination.page >= pagination.pages}
-                className="px-2 py-1 text-xs border rounded hover:bg-gray-100 disabled:opacity-50"
-              >
-                Next →
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    
-      {/* Professional Tracking Modal */}
+    <>
+      {/* Professional Tracking Modal - Rendered Outside Table Container */}
       {trackingModal.isOpen && trackingModal.order && (
-        <div className="fixed inset-0 bg-black/60 bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/60 bg-opacity-50 flex items-center justify-center z-[9999]">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-800 text-white rounded-t-lg">
@@ -429,63 +182,300 @@ export default function OrdersTable() {
 
                 {/* Shipping Address */}
                 <div>
-                  <h4 className="text-xs font-bold text-gray-800 mb-2">Shipping Address</h4>
-                  <div className="p-2 bg-gray-50 rounded text-xs text-gray-700">
+                  <h4 className="text-xs font-bold text-gray-800 mb-2">Customer Details</h4>
+                  <div className="text-xs space-y-1 bg-gray-50 p-2 rounded">
                     <div className="font-medium">{trackingModal.order.user?.name || 'N/A'}</div>
-                    <div>{trackingModal.order.shippingAddress?.street}</div>
-                    <div>{trackingModal.order.shippingAddress?.city}, {trackingModal.order.shippingAddress?.state} {trackingModal.order.shippingAddress?.pincode}</div>
-                    <div>{trackingModal.order.shippingAddress?.country}</div>
-                    {trackingModal.order.shippingAddress?.phone && (
-                      <div className="mt-1 pt-1 border-t border-gray-300">
-                        📱 {trackingModal.order.shippingAddress.phone}
+                    <div className="text-gray-600">{trackingModal.order.user?.email || 'N/A'}</div>
+                    {trackingModal.order.shippingAddress && (
+                      <div className="text-gray-600">
+                        {trackingModal.order.shippingAddress.address}, {trackingModal.order.shippingAddress.city}
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* Items Summary */}
-                <div>
-                  <h4 className="text-xs font-bold text-gray-800 mb-2">Items ({trackingModal.order.items?.length || 0})</h4>
-                  <div className="space-y-1 max-h-24 overflow-y-auto">
-                    {trackingModal.order.items?.map((item: any, index: number) => (
-                      <div key={index} className="flex justify-between items-center p-1 bg-gray-50 rounded text-xs">
-                        <div className="flex-1">
-                          <div className="font-medium text-gray-900 truncate">{item.name}</div>
-                          <div className="text-gray-600">Qty: {item.quantity}</div>
+                {/* Order Items */}
+                {trackingModal.order.items && trackingModal.order.items.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-bold text-gray-800 mb-2">Order Items</h4>
+                    <div className="space-y-2">
+                      {trackingModal.order.items.map((item: any, index: number) => (
+                        <div key={index} className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded">
+                          <div>
+                            <div className="font-medium">{item.product?.name || 'Unknown Product'}</div>
+                            <div className="text-gray-600">Qty: {item.quantity}</div>
+                          </div>
+                          <div className="font-bold">₹{((item.product?.price || 0) * (item.quantity || 1)).toFixed(2)}</div>
                         </div>
-                        <div className="font-bold text-gray-900">₹{item.total}</div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
+                )}
 
-            {/* Modal Footer */}
-            <div className="px-4 py-3 border-t bg-gray-50 rounded-b-lg">
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setTrackingModal({ isOpen: false, order: null })}
-                  className="flex-1 px-3 py-2 text-xs font-medium bg-gray-600 text-white rounded hover:bg-gray-700"
-                >
-                  Close
-                </button>
+                {/* Action Button */}
                 <button
                   onClick={() => {
-                    // Copy tracking info to clipboard
-                    const trackingText = `Order: ${trackingModal.order.orderNumber}\nStatus: ${trackingModal.order.status}\nTracking ID: ${trackingModal.order._id}`;
-                    navigator.clipboard.writeText(trackingText);
-                    alert('Tracking info copied to clipboard!');
+                    navigator.clipboard.writeText(`Order: ${trackingModal.order._id}\nStatus: ${trackingModal.order.status}\nAmount: ₹${trackingModal.order.totals?.total?.toFixed(2) || '0.00'}`);
                   }}
-                  className="flex-1 px-3 py-2 text-xs font-medium bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className="w-full px-3 py-2 text-xs font-medium bg-gradient-to-r from-slate-400 to-blue-500 text-white rounded hover:from-slate-500 hover:to-blue-600 transition-all duration-300"
                 >
-                  Copy Info
+                  📋 Copy Order Details
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
-    </div>
+
+      {/* Table Container */}
+      <div className="bg-white/95 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+      {/* Enhanced Header */}
+      <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-4 border-b border-slate-200">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-base font-bold text-slate-700">
+              📋 Orders ({pagination?.total || 0})
+            </h3>
+          </div>
+          {selectedOrders.length > 0 && (
+            <div className="flex items-center space-x-2">
+              <span className="text-xs bg-gradient-to-r from-slate-400 to-blue-500 text-white px-2 py-1 rounded-lg font-medium">
+                {selectedOrders.length} selected
+              </span>
+              <button className="px-3 py-1 text-xs bg-gradient-to-r from-slate-500 to-blue-500 text-white rounded-lg hover:from-slate-600 hover:to-blue-600 transition-all duration-300 shadow-lg font-medium">
+                ⚡ Actions
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Compact Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-xs">
+          <thead className="bg-gradient-to-r from-slate-50 to-blue-50">
+            <tr>
+              <th className="px-3 py-3 text-left">
+                <input
+                  type="checkbox"
+                  className="rounded border-slate-300 text-slate-600 shadow-sm focus:border-slate-300 focus:ring focus:ring-slate-200"
+                  onChange={(e) =>
+                    setSelectedOrders(e.target.checked ? orders.map(o => o._id) : [])
+                  }
+                />
+              </th>
+              <th className="px-3 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">📋 Order</th>
+              <th className="px-3 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">👤 Customer</th>
+              <th className="px-3 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">📦 Items</th>
+              <th className="px-3 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">💰 Amount</th>
+              <th className="px-3 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider w-24">📊 Status</th>
+              <th className="px-3 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">📅 Date</th>
+              <th className="px-3 py-3 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">⚡ Actions</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white">
+            {orders.map((order, index) => (
+              <React.Fragment key={order._id}>
+                <tr className={`${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'} hover:bg-gradient-to-r hover:from-slate-50 hover:to-blue-50 transition-all duration-300`}>
+                  <td className="px-3 py-3">
+                    <input
+                      type="checkbox"
+                      className="rounded border-slate-300 text-slate-600 shadow-sm focus:border-slate-300 focus:ring focus:ring-slate-200"
+                      checked={selectedOrders.includes(order._id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedOrders([...selectedOrders, order._id]);
+                        } else {
+                          setSelectedOrders(selectedOrders.filter(id => id !== order._id));
+                        }
+                      }}
+                    />
+                  </td>
+                  <td className="px-3 py-3">
+                    <div className="text-xs">
+                      <div className="font-bold text-gray-900">{order.orderNumber}</div>
+                      <div className="text-gray-600">#{order._id.slice(-6)}</div>
+                      {checkStockStatus(order.items || []) && (
+                        <div className="text-red-600 font-medium">⚠️ Low Stock</div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-3 py-3 min-w-44">
+                    <div className="text-xs">
+                      <div className="font-semibold text-gray-900">{order.user?.name || 'N/A'}</div>
+                      <div className="text-gray-600">{order.user?.email || 'N/A'}</div>
+                    </div>
+                  </td>
+                  <td className="px-3 py-3">
+                    <div className="text-xs">
+                      <div className="font-semibold text-gray-900">
+                        {order.items?.length || 0} items
+                      </div>
+                      <div className="text-gray-600">
+                        Qty: {order.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0}
+                      </div>
+                      {order.items && order.items.length > 0 && (
+                        <button
+                          onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
+                          className="text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          {expandedOrder === order._id ? '▲' : '▼'} View
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-3 py-3">
+                    <div className="text-xs">
+                      <div className="font-bold text-gray-900">₹{order.totals?.total?.toFixed(2) || '0.00'}</div>
+                      <div className={`px-1 py-0.5 rounded text-xs ${getPaymentBadge(order.paymentMethod, order.paymentStatus)}`}>
+                        {order.paymentMethod === 'cod' ? 'COD' : 'Online'}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-3 py-3 w-24">
+                    <div className="space-y-1">
+                      <select
+                        value={order.status}
+                        onChange={(e) => handleStatusUpdate(order._id, e.target.value)}
+                        disabled={updating}
+                        className="w-20 text-xs border border-gray-300 rounded px-1 py-1 bg-white text-gray-900 font-medium focus:border-blue-500"
+                      >
+                        <option value="PENDING">Pending</option>
+                        <option value="PAID">Paid</option>
+                        <option value="SHIPPED">Shipped</option>
+                        <option value="DELIVERED">Delivered</option>
+                        <option value="CANCELLED">Cancelled</option>
+                      </select>
+                      <div>
+                        <span className={`inline-block px-1 py-0.5 rounded text-xs font-medium ${getStatusBadge(order.status)}`}>
+                          {order.status}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-3 py-3 text-xs font-medium text-gray-900">
+                    <div>{new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</div>
+                    <div className="text-gray-600">{new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
+                  </td>
+                  <td className="px-3 py-3">
+                    <div className="flex space-x-1">
+                      <button 
+                        onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
+                        className="px-2 py-1 text-xs font-medium bg-gradient-to-r from-slate-400 to-blue-500 text-white rounded-lg hover:from-slate-500 hover:to-blue-600 transition-all duration-300 shadow-lg"
+                      >
+                        {expandedOrder === order._id ? 'Hide' : 'View'}
+                      </button>
+                      <button 
+                        onClick={() => setTrackingModal({ isOpen: true, order })}
+                        className="px-2 py-1 text-xs font-medium bg-gradient-to-r from-green-400 to-emerald-500 text-white rounded-lg hover:from-green-500 hover:to-emerald-600 transition-all duration-300 shadow-lg"
+                      >
+                        Track
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                {/* Compact Expanded Order Details */}
+                {expandedOrder === order._id && (
+                  <tr>
+                    <td colSpan={8} className="px-3 py-2 bg-gray-50 border-l-2 border-blue-500">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {/* Order Items */}
+                        <div>
+                          <h5 className="text-xs font-bold text-gray-900 mb-1">Items ({order.items?.length || 0})</h5>
+                          <div className="space-y-1 max-h-32 overflow-y-auto">
+                            {order.items?.map((item: any, index: number) => (
+                              <div key={index} className="flex items-center space-x-2 p-1 bg-white rounded text-xs">
+                                {item.product?.images?.[0] && (
+                                  <img
+                                    src={item.product.images[0].url}
+                                    alt={item.product.images[0].alt}
+                                    className="w-8 h-8 rounded object-cover"
+                                  />
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-medium text-gray-900 truncate">{item.name}</div>
+                                  <div className="text-gray-600">
+                                    {item.sku} | Qty: {item.quantity} | ₹{item.price}
+                                  </div>
+                                  <div className="flex space-x-1">
+                                    <span className={`px-1 py-0.5 rounded text-xs ${
+                                      item.product?.inventory?.available > 10 ? 'bg-green-100 text-green-800' 
+                                      : item.product?.inventory?.available > 0 ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-red-100 text-red-800'
+                                    }`}>
+                                      Stock: {item.product?.inventory?.available || 'N/A'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="text-xs font-bold">₹{item.total}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* Shipping & Actions */}
+                        <div>
+                          <h5 className="text-xs font-bold text-gray-900 mb-1">Shipping & Actions</h5>
+                          <div className="p-2 bg-white rounded text-xs mb-2">
+                            <div>{order.shippingAddress?.street}</div>
+                            <div>{order.shippingAddress?.city}, {order.shippingAddress?.state} {order.shippingAddress?.pincode}</div>
+                            {order.shippingAddress?.phone && <div>📱 {order.shippingAddress.phone}</div>}
+                          </div>
+                          <div className="grid grid-cols-2 gap-1">
+                            <button className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700">
+                              Update Status
+                            </button>
+                            <button className="px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700">
+                              Reserve Stock
+                            </button>
+                            <button className="px-2 py-1 bg-yellow-600 text-white rounded text-xs hover:bg-yellow-700">
+                              Check Inventory
+                            </button>
+                            <button className="px-2 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700">
+                              Invoice
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Compact Pagination */}
+      {pagination && pagination.pages > 1 && (
+        <div className="bg-gradient-to-r from-slate-50 to-blue-50 px-4 py-3 border-t border-slate-200">
+          <div className="flex justify-between items-center">
+            <div className="text-xs text-slate-700 font-medium">
+              📄 {((pagination.page - 1) * 20) + 1}-{Math.min(pagination.page * 20, pagination.total)} of {pagination.total}
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handlePageChange(pagination.page - 1)}
+                disabled={pagination.page <= 1}
+                className="px-3 py-1.5 text-xs bg-gradient-to-r from-slate-500 to-slate-600 text-white rounded-lg hover:from-slate-600 hover:to-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg font-medium"
+              >
+                ⬅️ Prev
+              </button>
+              <span className="px-3 py-1.5 text-xs bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg font-medium">
+                {pagination.page}/{pagination.pages}
+              </span>
+              <button
+                onClick={() => handlePageChange(pagination.page + 1)}
+                disabled={pagination.page >= pagination.pages}
+                className="px-3 py-1.5 text-xs bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg font-medium"
+              >
+                Next ➡️
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      </div>
+    </>
   );
 }
