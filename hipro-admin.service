@@ -1,0 +1,21 @@
+[Unit]
+Description=HiPro Commerce Admin Panel
+Documentation=https://github.com/Amit-Kumar22/hipro-comm
+After=network.target hipro-api.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/hipro-comm-admin
+ExecStart=/usr/bin/npm start
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=hipro-admin
+Environment=NODE_ENV=production
+Environment=PORT=3202
+Environment=NEXT_PUBLIC_API_URL=https://api.shop.hiprotech.org
+
+[Install]
+WantedBy=multi-user.target
