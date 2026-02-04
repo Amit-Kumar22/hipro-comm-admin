@@ -360,7 +360,8 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
         showSuccess('Product updated successfully! Stock and inventory updated automatically.');
       } else {
         result = await dispatch(createAdminProduct(finalProductData)).unwrap();
-        if (formData.inventory.quantity === 0) {
+        const stockQuantity = typeof formData.inventory.quantity === 'string' ? parseInt(formData.inventory.quantity) || 0 : formData.inventory.quantity;
+        if (stockQuantity === 0) {
           showSuccess('Product created successfully! Product is marked as "Out of Stock" in inventory.');
         } else {
           showSuccess('Product created successfully! Inventory record created with initial stock.');
