@@ -74,7 +74,22 @@ export const getAdminCategories = createAsyncThunk(
         { headers: getAdminAuthHeaders() }
       );
 
-      return response.data.data;
+      // Safely handle the API response structure
+      const responseData = response.data?.data || response.data || {};
+      const categories = responseData.categories || responseData || [];
+      const pagination = responseData.pagination || {
+        totalCount: Array.isArray(categories) ? categories.length : 0,
+        totalPages: 1,
+        currentPage: 1,
+        hasNext: false,
+        hasPrev: false,
+        limit: 10,
+      };
+
+      return {
+        categories: Array.isArray(categories) ? categories : [],
+        pagination
+      };
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to fetch categories';
       return rejectWithValue(errorMessage);
@@ -183,12 +198,15 @@ const adminCategoriesSlice = createSlice({
       })
       .addCase(getAdminCategories.fulfilled, (state, action) => {
         state.loading = false;
-        state.categories = action.payload.categories || action.payload || [];
-        state.pagination = action.payload.pagination || initialState.pagination;
+        state.categories = action.payload?.categories || [];
+        state.pagination = action.payload?.pagination || initialState.pagination;
       })
       .addCase(getAdminCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+        // Ensure categories is always an array even on error
+        state.categories = [];
+        state.pagination = initialState.pagination;
       });
 
     // Get Admin Category

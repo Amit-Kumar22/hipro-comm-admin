@@ -15,7 +15,7 @@ StandardError=syslog
 SyslogIdentifier=hipro-admin
 Environment=NODE_ENV=production
 Environment=PORT=3202
-Environment=NEXT_PUBLIC_API_URL=https://api.shop.hiprotech.org
+Environment=NEXT_PUBLIC_API_URL=https://shop.hiprotech.org/api/v1
 
 [Install]
 WantedBy=multi-user.target
