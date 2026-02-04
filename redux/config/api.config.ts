@@ -4,14 +4,10 @@
  */
 
 // API Base URL
-<<<<<<< HEAD
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
   (typeof window !== 'undefined' && window.location.hostname === 'localhost'
     ? 'http://localhost:5000/api/v1'
     : 'https://api.shop.hiprotech.org/api/v1');
-=======
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://shop.hiprotech.org/api/v1';
->>>>>>> d5ad6bb136a49397525db18d8017acc73423eb98
 
 /**
  * Get admin authentication headers for API requests
