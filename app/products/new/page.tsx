@@ -14,8 +14,8 @@ interface ProductFormData {
   shortDescription: string;
   category: string;
   price: {
-    original: number;
-    selling: number;
+    original: number | string;
+    selling: number | string;
     discount: number;
   };
   images: Array<{
@@ -25,7 +25,7 @@ interface ProductFormData {
   }>;
   sku: string;
   inventory: {
-    availableForSale: number;
+    availableForSale: number | string;
     isOutOfStock: boolean;
   };
   specifications: { [key: string]: string };
@@ -50,14 +50,14 @@ export default function AddProductPage() {
     shortDescription: '',
     category: '',
     price: {
-      original: 0,
-      selling: 0,
+      original: '',
+      selling: '',
       discount: 0,
     },
     images: [],
     sku: '',
     inventory: {
-      availableForSale: 0,
+      availableForSale: '',
       isOutOfStock: false,
     },
     specifications: {},
@@ -101,7 +101,9 @@ export default function AddProductPage() {
 
   const handlePriceChange = (field: 'original' | 'selling', value: number) => {
     const newPrice = { ...productData.price, [field]: value };
-    newPrice.discount = calculateDiscount(newPrice.original, newPrice.selling);
+    const originalNum = typeof newPrice.original === 'string' ? parseFloat(newPrice.original) || 0 : newPrice.original;
+    const sellingNum = typeof newPrice.selling === 'string' ? parseFloat(newPrice.selling) || 0 : newPrice.selling;
+    newPrice.discount = calculateDiscount(originalNum, sellingNum);
     
     setProductData(prev => ({
       ...prev,
@@ -122,6 +124,17 @@ export default function AddProductPage() {
     const newUrls = [...imageUrls];
     newUrls[index] = url;
     setImageUrls(newUrls);
+  };
+
+  const handleImageFileSelect = (index: number, file: File | null) => {
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        updateImageUrl(index, dataUrl);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const addTag = () => {
@@ -183,20 +196,23 @@ export default function AddProductPage() {
       }));
 
     const categoryData = categories.find(cat => cat._id === selectedCategory);
+    const stockQuantity = typeof productData.inventory.availableForSale === 'string' 
+      ? parseInt(productData.inventory.availableForSale) || 0 
+      : productData.inventory.availableForSale;
     
     const finalProductData = {
       ...productData,
       category: categoryData ? { _id: categoryData._id, name: categoryData.name, slug: categoryData.slug } : { _id: '', name: '', slug: '' },
       images: validImages,
       inventory: {
-        quantity: productData.inventory.availableForSale,
+        quantity: stockQuantity,
         reserved: 0,
-        available: productData.inventory.availableForSale,
+        available: stockQuantity,
         threshold: 0,
-        isOutOfStock: productData.inventory.availableForSale <= 0,
-        availableForSale: productData.inventory.availableForSale
+        isOutOfStock: stockQuantity <= 0,
+        availableForSale: stockQuantity
       },
-      inStock: productData.inventory.availableForSale > 0
+      inStock: stockQuantity > 0
     };
 
     try {
@@ -361,6 +377,7 @@ export default function AddProductPage() {
                     availableForSale: parseInt(e.target.value) || 0
                   }
                 }))}
+                placeholder="Enter stock quantity"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 required
               />
@@ -412,6 +429,7 @@ export default function AddProductPage() {
                 step="0.01"
                 value={productData.price.original}
                 onChange={(e) => handlePriceChange('original', parseFloat(e.target.value) || 0)}
+                placeholder="Enter original price"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 required
               />
@@ -428,6 +446,7 @@ export default function AddProductPage() {
                 step="0.01"
                 value={productData.price.selling}
                 onChange={(e) => handlePriceChange('selling', parseFloat(e.target.value) || 0)}
+                placeholder="Enter selling price"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 required
               />
@@ -451,25 +470,39 @@ export default function AddProductPage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Product Images</h2>
           
           {imageUrls.map((url, index) => (
-            <div key={index} className="flex items-center gap-2 mb-3">
-              <input
-                type="url"
-                value={url}
-                onChange={(e) => updateImageUrl(index, e.target.value)}
-                placeholder={`Image URL ${index + 1}${index === 0 ? ' (Primary)' : ''}`}
-                className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-              {index === 0 && (
-                <span className="text-xs text-orange-600 font-medium">PRIMARY</span>
-              )}
-              {imageUrls.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeImageUrl(index)}
-                  className="px-2 py-1 text-red-600 hover:bg-red-50 rounded"
-                >
-                  Remove
-                </button>
+            <div key={index} className="mb-4 p-4 border border-gray-200 rounded-lg">
+              <div className="flex items-center gap-2 mb-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageFileSelect(index, e.target.files?.[0] || null)}
+                  className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                />
+                {index === 0 && (
+                  <span className="text-xs text-orange-600 font-medium bg-orange-50 px-2 py-1 rounded">PRIMARY</span>
+                )}
+                {imageUrls.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeImageUrl(index)}
+                    className="px-3 py-2 text-red-600 hover:bg-red-50 rounded border border-red-300"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              
+              {url && (
+                <div className="mt-3">
+                  <img 
+                    src={url} 
+                    alt={`Product image ${index + 1}`}
+                    className="h-24 w-24 object-cover rounded-md border border-gray-200 shadow-sm"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {index === 0 ? 'Primary product image' : `Additional image ${index}`}
+                  </p>
+                </div>
               )}
             </div>
           ))}
@@ -477,8 +510,11 @@ export default function AddProductPage() {
           <button
             type="button"
             onClick={addImageUrl}
-            className="mt-2 px-3 py-2 text-sm text-orange-600 border border-orange-300 rounded-md hover:bg-orange-50"
+            className="mt-2 px-4 py-2 text-sm text-orange-600 border border-orange-300 rounded-md hover:bg-orange-50 flex items-center gap-2"
           >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
             Add Another Image
           </button>
         </div>

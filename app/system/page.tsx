@@ -15,7 +15,12 @@ export default function AdminSystemPage() {
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm">
-        <p className="text-red-800">Error loading system info: {error}</p>
+        <p className="text-red-800">
+          Error loading system info: {typeof error === 'string' ? error : 
+          typeof error === 'object' && error && 'message' in error ? 
+          (typeof (error as any).message === 'string' ? (error as any).message : 'Unknown error') :
+          'System information unavailable'}
+        </p>
       </div>
     );
   }

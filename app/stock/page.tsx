@@ -166,7 +166,7 @@ export default function StockPage() {
         });
       }, 1000);
     } catch (error: any) {
-      const errorMessage = error?.message || 'Inventory sync failed';
+      const errorMessage = (error && typeof error === 'object' && 'message' in error ? (error as any).message : null) || 'Inventory sync failed';
       if (errorMessage.includes('Too many requests')) {
         showError('Rate limit exceeded. Please wait before syncing again.');
       } else {
@@ -208,10 +208,10 @@ export default function StockPage() {
     } catch (error: any) {
       let errorMessage = 'Failed to adjust stock';
       
-      if (error?.details && Array.isArray(error.details)) {
-        errorMessage = error.details.map((d: any) => `${d.field}: ${d.message}`).join(', ');
-      } else if (error?.message) {
-        errorMessage = error.message;
+      if (error && typeof error === 'object' && 'details' in error && Array.isArray((error as any).details)) {
+        errorMessage = (error as any).details.map((d: any) => `${d.field}: ${d.message}`).join(', ');
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = (error as any).message;
       }
       
       if (errorMessage.includes('Too many requests')) {
@@ -243,10 +243,10 @@ export default function StockPage() {
     } catch (error: any) {
       let errorMessage = 'Failed to update inventory';
       
-      if (error?.details && Array.isArray(error.details)) {
-        errorMessage = error.details.map((d: any) => `${d.field}: ${d.message}`).join(', ');
-      } else if (error?.message) {
-        errorMessage = error.message;
+      if (error && typeof error === 'object' && 'details' in error && Array.isArray((error as any).details)) {
+        errorMessage = (error as any).details.map((d: any) => `${d.field}: ${d.message}`).join(', ');
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = (error as any).message;
       }
       
       if (errorMessage.includes('Too many requests')) {
@@ -263,7 +263,7 @@ export default function StockPage() {
       await dispatch(getLowStockItems());
       showSuccess('Low stock items loaded successfully');
     } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to load low stock items';
+      const errorMessage = (error && typeof error === 'object' && 'message' in error ? (error as any).message : null) || 'Failed to load low stock items';
       if (errorMessage.includes('Too many requests')) {
         showError('Rate limit exceeded. Please wait before trying again.');
       } else {
@@ -318,7 +318,12 @@ export default function StockPage() {
             <AlertCircle className="h-16 w-16 mx-auto" />
           </div>
           <h3 className="text-2xl font-semibold text-gray-900 mb-3">Error Loading Stock</h3>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <p className="text-gray-600 mb-6">
+            {typeof error === 'string' ? error : 
+             typeof error === 'object' && error && 'message' in error ? 
+             (typeof (error as any).message === 'string' ? (error as any).message : 'Failed to load stock data') :
+             'An error occurred while loading stock information'}
+          </p>
           <button 
             onClick={() => window.location.reload()}
             className="bg-gradient-to-r from-slate-500 to-blue-500 hover:from-slate-600 hover:to-blue-600 text-white px-6 py-3 rounded-xl transition-all duration-300 shadow-lg font-medium"

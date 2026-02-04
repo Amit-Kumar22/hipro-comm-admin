@@ -98,7 +98,12 @@ export default function AdminDashboard() {
             <Activity className="h-12 w-12 mx-auto" />
           </div>
           <h3 className="text-lg font-semibold text-red-900 mb-2">Error Loading Dashboard</h3>
-          <p className="text-red-800 text-sm">{error}</p>
+          <p className="text-red-800 text-sm">
+            {typeof error === 'string' ? error : 
+             typeof error === 'object' && error && 'message' in error ? 
+             (typeof (error as any).message === 'string' ? (error as any).message : 'Failed to load dashboard') :
+             'An error occurred while loading dashboard data'}
+          </p>
         </div>
       </div>
     );

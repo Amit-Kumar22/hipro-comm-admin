@@ -22,8 +22,8 @@ interface ProductFormData {
   shortDescription: string;
   category: string; // Store as string for form, convert to object on submit
   price: {
-    original: number;
-    selling: number;
+    original: number | string;
+    selling: number | string;
     discount: number;
   };
   images: Array<{
@@ -33,12 +33,12 @@ interface ProductFormData {
   }>;
   sku: string;
   inventory: {
-    quantity: number;
+    quantity: number | string;
     reserved: number;
-    available: number;
+    available: number | string;
     threshold: number;
     isOutOfStock: boolean;
-    availableForSale: number;
+    availableForSale: number | string;
   };
   inStock: boolean;
   specifications: Array<{
@@ -46,10 +46,10 @@ interface ProductFormData {
     value: string;
   }>;
   dimensions: {
-    length: number;
-    width: number;
-    height: number;
-    weight: number;
+    length: number | string;
+    width: number | string;
+    height: number | string;
+    weight: number | string;
     unit: 'cm' | 'inch';
     weightUnit: 'kg' | 'lbs';
   };
@@ -70,17 +70,17 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
     description: '',
     shortDescription: '',
     category: '',
-    price: { original: 0, selling: 0, discount: 0 },
+    price: { original: '', selling: '', discount: 0 },
     images: [],
     sku: '',
-    inventory: { quantity: 0, reserved: 0, available: 0, threshold: 5, isOutOfStock: true, availableForSale: 0 },
+    inventory: { quantity: '', reserved: 0, available: '', threshold: 5, isOutOfStock: true, availableForSale: '' },
     inStock: true,
     specifications: [],
     dimensions: {
-      length: 0,
-      width: 0,
-      height: 0,
-      weight: 0,
+      length: '',
+      width: '',
+      height: '',
+      weight: '',
       unit: 'cm',
       weightUnit: 'kg'
     },
@@ -96,9 +96,19 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
 
   useEffect(() => {
     if (isOpen) {
+      console.log('🔄 Admin ProductModal opened, loading categories...');
       dispatch(getAdminCategories({ includeInactive: false }));
     }
   }, [isOpen, dispatch]);
+
+  // Debug categories loading
+  useEffect(() => {
+    console.log('📊 Admin Categories state update:', {
+      categoriesCount: categories?.length || 0,
+      loading: categoriesLoading,
+      categories: categories?.slice(0, 3) // Show first 3 for debugging
+    });
+  }, [categories, categoriesLoading]);
 
   useEffect(() => {
     if (product) {
@@ -198,7 +208,9 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
 
   const handlePriceChange = (field: 'original' | 'selling', value: number) => {
     const newPrice = { ...formData.price, [field]: value };
-    newPrice.discount = calculateDiscount(newPrice.original, newPrice.selling);
+    const originalNum = typeof newPrice.original === 'string' ? parseFloat(newPrice.original) || 0 : newPrice.original;
+    const sellingNum = typeof newPrice.selling === 'string' ? parseFloat(newPrice.selling) || 0 : newPrice.selling;
+    newPrice.discount = calculateDiscount(originalNum, sellingNum);
     setFormData(prev => ({ ...prev, price: newPrice }));
   };
 
@@ -217,6 +229,17 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
     const newUrls = [...imageUrls];
     newUrls[index] = url;
     setImageUrls(newUrls);
+  };
+
+  const handleImageFileSelect = (index: number, file: File | null) => {
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        updateImageUrl(index, dataUrl);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const addTag = () => {
@@ -281,7 +304,10 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
       return;
     }
     
-    if (formData.price.original <= 0 || formData.price.selling <= 0) {
+    const originalPrice = typeof formData.price.original === 'string' ? parseFloat(formData.price.original) || 0 : formData.price.original;
+    const sellingPrice = typeof formData.price.selling === 'string' ? parseFloat(formData.price.selling) || 0 : formData.price.selling;
+    
+    if (originalPrice <= 0 || sellingPrice <= 0) {
       showError('Price must be greater than 0');
       return;
     }
@@ -314,7 +340,10 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
       } : {
         initialStock: formData.inventory.quantity, // For new products, use initialStock
         reorderLevel: formData.inventory.threshold,
-        maxStockLevel: Math.max(formData.inventory.quantity + 1000, formData.inventory.quantity * 2)
+        maxStockLevel: Math.max(
+          (typeof formData.inventory.quantity === 'string' ? parseInt(formData.inventory.quantity) || 0 : formData.inventory.quantity) + 1000,
+          (typeof formData.inventory.quantity === 'string' ? parseInt(formData.inventory.quantity) || 0 : formData.inventory.quantity) * 2
+        )
       })
     };
 
@@ -349,10 +378,10 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
       // Handle Redux error object structure
       let errorMessage = 'Failed to save product. Please try again.';
       
-      if (error?.details && Array.isArray(error.details)) {
+      if (error && typeof error === 'object' && 'details' in error && Array.isArray((error as any).details)) {
         // Handle validation errors from backend
         errorMessage = error.details.map((d: any) => `${d.field}: ${d.message}`).join(', ');
-      } else if (error?.message) {
+      } else if (error && typeof error === 'object' && 'message' in error) {
         // Handle general error message
         errorMessage = error.message;
       }
@@ -390,13 +419,24 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
               className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
               required
             >
-              <option value="">Select Category</option>
+              <option value="">
+                {categoriesLoading ? 'Loading categories...' : 'Select Category'}
+              </option>
+              {!categoriesLoading && categories?.length === 0 && (
+                <option value="" disabled>No categories available</option>
+              )}
               {categories?.map((category) => (
                 <option key={category._id} value={category._id}>
                   {category.name}
                 </option>
               ))}
             </select>
+            {categoriesLoading && (
+              <p className="text-xs text-gray-500 mt-1">Loading categories...</p>
+            )}
+            {!categoriesLoading && categories?.length === 0 && (
+              <p className="text-xs text-red-500 mt-1">No categories found. Please create categories first.</p>
+            )}
           </div>
 
           <div>
@@ -427,6 +467,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
                 },
                 inStock: parseInt(e.target.value) > 0
               }))}
+              placeholder="Stock quantity"
               className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
               required
             />
@@ -468,6 +509,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
               step="0.01"
               value={formData.price.original}
               onChange={(e) => handlePriceChange('original', parseFloat(e.target.value) || 0)}
+              placeholder="Original price"
               className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
               required
             />
@@ -481,6 +523,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
               step="0.01"
               value={formData.price.selling}
               onChange={(e) => handlePriceChange('selling', parseFloat(e.target.value) || 0)}
+              placeholder="Selling price"
               className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
               required
             />
@@ -509,6 +552,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
                   ...prev,
                   dimensions: { ...prev.dimensions, length: parseFloat(e.target.value) || 0 }
                 }))}
+                placeholder="Length"
                 className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
                 required
               />
@@ -525,6 +569,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
                   ...prev,
                   dimensions: { ...prev.dimensions, width: parseFloat(e.target.value) || 0 }
                 }))}
+                placeholder="Width"
                 className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
                 required
               />
@@ -541,6 +586,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
                   ...prev,
                   dimensions: { ...prev.dimensions, height: parseFloat(e.target.value) || 0 }
                 }))}
+                placeholder="Height"
                 className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
                 required
               />
@@ -557,6 +603,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
                   ...prev,
                   dimensions: { ...prev.dimensions, weight: parseFloat(e.target.value) || 0 }
                 }))}
+                placeholder="Weight"
                 className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
                 required
               />
@@ -598,33 +645,52 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
 
         {/* Images */}
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">Product Images</label>
+          <label className="block text-xs font-medium text-gray-700 mb-2">Product Images</label>
           {imageUrls.map((url, index) => (
-            <div key={index} className="flex items-center gap-2 mb-2">
-              <input
-                type="url"
-                value={url}
-                onChange={(e) => updateImageUrl(index, e.target.value)}
-                placeholder={`Image URL ${index + 1}${index === 0 ? ' (Primary)' : ''}`}
-                className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
-              />
-              {index === 0 && <span className="text-xs text-orange-600 font-medium">PRIMARY</span>}
-              {imageUrls.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeImageUrl(index)}
-                  className="px-2 py-1 text-red-600 hover:bg-red-50 rounded text-xs"
-                >
-                  Remove
-                </button>
+            <div key={index} className="mb-3 p-3 border border-gray-200 rounded-md bg-gray-50">
+              <div className="flex items-center gap-2 mb-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageFileSelect(index, e.target.files?.[0] || null)}
+                  className="flex-1 text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-orange-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-medium file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                />
+                {index === 0 && (
+                  <span className="text-xs text-orange-600 font-medium bg-orange-100 px-2 py-1 rounded">PRIMARY</span>
+                )}
+                {imageUrls.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeImageUrl(index)}
+                    className="px-2 py-1 text-red-600 hover:bg-red-50 rounded text-xs border border-red-300"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              
+              {url && (
+                <div className="mt-2">
+                  <img 
+                    src={url} 
+                    alt={`Product image ${index + 1}`}
+                    className="h-16 w-16 object-cover rounded border border-gray-200 shadow-sm"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {index === 0 ? 'Primary image' : `Additional image ${index}`}
+                  </p>
+                </div>
               )}
             </div>
           ))}
           <button
             type="button"
             onClick={addImageUrl}
-            className="text-xs text-orange-600 border border-orange-300 rounded px-2 py-1 hover:bg-orange-50"
+            className="text-xs text-orange-600 border border-orange-300 rounded px-2 py-1 hover:bg-orange-50 flex items-center gap-1"
           >
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
             Add Another Image
           </button>
         </div>

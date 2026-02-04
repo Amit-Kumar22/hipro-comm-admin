@@ -104,7 +104,12 @@ export default function UsersPage() {
             <AlertCircle className="h-12 w-12 mx-auto" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Users</h3>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-gray-600 mb-4">
+            {typeof error === 'string' ? error : 
+             typeof error === 'object' && error && 'message' in error ? 
+             (typeof (error as any).message === 'string' ? (error as any).message : 'Failed to load users') :
+             'An error occurred while loading users'}
+          </p>
           <button 
             onClick={handleRefresh}
             className="bg-gradient-to-r from-slate-500 to-blue-500 hover:from-slate-600 hover:to-blue-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg"

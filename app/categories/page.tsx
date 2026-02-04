@@ -114,7 +114,12 @@ export default function AdminCategoriesPage() {
             <AlertCircle className="h-12 w-12 mx-auto" />
           </div>
           <h3 className="text-xl font-bold text-red-900 mb-2">Error Loading Categories</h3>
-          <p className="text-red-800 mb-4 text-sm">{error}</p>
+          <p className="text-red-800 mb-4 text-sm">
+            {typeof error === 'string' ? error : 
+             typeof error === 'object' && error && 'message' in error ? 
+             (typeof (error as any).message === 'string' ? (error as any).message : 'Failed to load categories') :
+             'An error occurred while loading categories'}
+          </p>
           <button 
             onClick={handleRefresh}
             className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-300 shadow-lg text-sm"
