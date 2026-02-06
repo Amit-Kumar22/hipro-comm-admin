@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import { fetchAllOrders, updateOrderStatus } from '../../redux/slices/adminOrdersSlice';
+import PaymentVerification from './PaymentVerification';
 
 export default function OrdersTable() {
   const dispatch = useDispatch<AppDispatch>();
@@ -17,6 +18,16 @@ export default function OrdersTable() {
     isOpen: false,
     order: null
   });
+  const [paymentVerificationModal, setPaymentVerificationModal] = useState<{ 
+    isOpen: boolean; 
+    payment: any | null; 
+    order: any | null;
+  }>({
+    isOpen: false,
+    payment: null,
+    order: null
+  });
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   useEffect(() => {
     dispatch(fetchAllOrders({ page: 1, limit: 20, ...filters }));
@@ -29,6 +40,67 @@ export default function OrdersTable() {
 
   const handlePageChange = (page: number) => {
     dispatch(fetchAllOrders({ page, limit: 20, ...filters }));
+  };
+
+  // Payment verification functions
+  const handleVerifyPayment = async (paymentId: string, orderId: string) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/admin/verify/${paymentId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPaymentVerificationModal({
+          isOpen: true,
+          payment: data.data.payment,
+          order: data.data.order
+        });
+      } else {
+        alert('Failed to fetch payment details');
+      }
+    } catch (error) {
+      console.error('Error fetching payment details:', error);
+      alert('Error fetching payment details');
+    }
+  };
+
+  const handlePaymentAction = async (paymentId: string, action: 'approve' | 'reject', message?: string) => {
+    setIsProcessingPayment(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/admin/verify`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          paymentId,
+          action,
+          message
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(data.message);
+        
+        // Close modal and refresh orders
+        setPaymentVerificationModal({ isOpen: false, payment: null, order: null });
+        dispatch(fetchAllOrders({ page: pagination?.page || 1, limit: 20, ...filters }));
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to process payment action');
+      }
+    } catch (error) {
+      console.error('Error processing payment action:', error);
+      alert('Error processing payment action');
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -325,11 +397,25 @@ export default function OrdersTable() {
                     </div>
                   </td>
                   <td className="px-3 py-3">
-                    <div className="text-xs">
+                    <div className="text-xs space-y-1">
                       <div className="font-bold text-gray-900">₹{order.totals?.total?.toFixed(2) || '0.00'}</div>
                       <div className={`px-1 py-0.5 rounded text-xs ${getPaymentBadge(order.paymentMethod, order.paymentStatus)}`}>
                         {order.paymentMethod === 'cod' ? 'COD' : 'Online'}
                       </div>
+                      {/* Show Verify Payment button for pending online payments */}
+                      {order.paymentMethod !== 'cod' && order.paymentStatus === 'PENDING' && order.paymentId && (
+                        <button
+                          onClick={() => handleVerifyPayment(order.paymentId!, order._id)}
+                          className="px-2 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600 transition-colors w-full"
+                        >
+                          🔍 Verify Payment
+                        </button>
+                      )}
+                      {order.paymentMethod !== 'cod' && order.paymentStatus === 'PAID' && (
+                        <div className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs text-center">
+                          ✅ Verified
+                        </div>
+                      )}
                     </div>
                   </td>
                   <td className="px-3 py-3 w-24">

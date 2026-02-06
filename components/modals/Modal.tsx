@@ -8,9 +8,10 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  preventBackdropClose?: boolean;
 }
 
-export default function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
+export default function Modal({ isOpen, onClose, title, children, size = 'md', preventBackdropClose = true }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
   const sizeClasses = {
@@ -22,7 +23,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape' && !preventBackdropClose) onClose();
     };
 
     if (isOpen) {
@@ -34,10 +35,10 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, preventBackdropClose]);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
-    if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+    if (!preventBackdropClose && modalRef.current && !modalRef.current.contains(e.target as Node)) {
       onClose();
     }
   };

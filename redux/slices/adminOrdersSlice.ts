@@ -41,6 +41,7 @@ export interface AdminOrder {
   status: string;
   paymentStatus: string;
   paymentMethod: string;
+  paymentId?: string;
   tracking?: {
     carrier?: string;
     trackingNumber?: string;

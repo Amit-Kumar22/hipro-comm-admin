@@ -7,6 +7,8 @@ import { getAdminCategories } from '@/redux/slices/adminCategoriesSlice';
 import { getInventory } from '@/redux/slices/inventorySlice';
 import { useToast } from '@/components/providers/ToastProvider';
 import Modal from './Modal';
+import ImageUpload from '../ui/ImageUpload';
+import VideoUpload from '../ui/VideoUpload';
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -31,6 +33,7 @@ interface ProductFormData {
     alt: string;
     isPrimary: boolean;
   }>;
+  video: string; // Video URL
   sku: string;
   inventory: {
     quantity: number | string;
@@ -72,6 +75,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
     category: '',
     price: { original: '', selling: '', discount: 0 },
     images: [],
+    video: '',
     sku: '',
     inventory: { quantity: '', reserved: 0, available: '', threshold: 5, isOutOfStock: true, availableForSale: '' },
     inStock: true,
@@ -89,10 +93,16 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
     isFeatured: false,
   });
 
-  const [imageUrls, setImageUrls] = useState<string[]>(['']);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [specKey, setSpecKey] = useState('');
   const [specValue, setSpecValue] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Handle video change
+  const handleVideoChange = (videoUrl: string) => {
+    setFormData(prev => ({ ...prev, video: videoUrl }));
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -136,6 +146,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
         category: product.category?._id || product.category || '',
         price: product.price || { original: 0, selling: 0, discount: 0 },
         images: product.images || [],
+        video: product.video?.url || '', // Extract URL from video object
         sku: product.sku || '',
         inventory: inventoryData,
         inStock: product.inStock ?? (inventoryData.available > 0),
@@ -152,7 +163,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
         isActive: product.isActive ?? true,
         isFeatured: product.isFeatured ?? false,
       });
-      setImageUrls(product.images?.map((img: any) => img.url) || ['']);
+      setImageUrls(product.images?.map((img: any) => img.url) || []);
     } else {
       setFormData({
         name: '',
@@ -162,6 +173,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
         category: '',
         price: { original: 0, selling: 0, discount: 0 },
         images: [],
+        video: '',
         sku: '',
         inventory: { quantity: 0, reserved: 0, available: 0, threshold: 5, isOutOfStock: true, availableForSale: 0 },
         inStock: true,
@@ -178,7 +190,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
         isActive: true,
         isFeatured: false,
       });
-      setImageUrls(['']);
+      setImageUrls([]);
     }
   }, [product, isOpen]);
 
@@ -282,75 +294,79 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Client-side validation
-    if (!formData.name.trim()) {
-      showError('Product name is required');
-      return;
-    }
-    
-    if (formData.shortDescription.trim().length < 10) {
-      showError('Short description must be at least 10 characters');
-      return;
-    }
-    
-    if (!formData.description.trim()) {
-      showError('Product description is required');
-      return;
-    }
-    
-    if (!formData.category) {
-      showError('Please select a category');
-      return;
-    }
-    
-    const originalPrice = typeof formData.price.original === 'string' ? parseFloat(formData.price.original) || 0 : formData.price.original;
-    const sellingPrice = typeof formData.price.selling === 'string' ? parseFloat(formData.price.selling) || 0 : formData.price.selling;
-    
-    if (originalPrice <= 0 || sellingPrice <= 0) {
-      showError('Price must be greater than 0');
-      return;
-    }
-    
-    const validImages = imageUrls
-      .filter(url => url.trim() !== '')
-      .map((url, index) => ({
-        url: url.trim(),
-        alt: formData.name,
-        isPrimary: index === 0
-      }));
+    if (isSubmitting) return;
 
-    // Prepare data for API
-    const finalProductData = {
-      name: formData.name,
-      slug: formData.slug,
-      description: formData.description,
-      shortDescription: formData.shortDescription,
-      categoryId: formData.category, // Send as categoryId, not category object
-      price: formData.price,
-      images: validImages,
-      specifications: formData.specifications,
-      dimensions: formData.dimensions,
-      tags: formData.tags,
-      isFeatured: formData.isFeatured,
-      isActive: formData.isActive,
-      // For both new products and updates, send stock quantity
-      ...(product ? {
-        stockQuantity: formData.inventory.quantity // For updates, use stockQuantity
-      } : {
-        initialStock: formData.inventory.quantity, // For new products, use initialStock
-        reorderLevel: formData.inventory.threshold,
-        maxStockLevel: Math.max(
-          (typeof formData.inventory.quantity === 'string' ? parseInt(formData.inventory.quantity) || 0 : formData.inventory.quantity) + 1000,
-          (typeof formData.inventory.quantity === 'string' ? parseInt(formData.inventory.quantity) || 0 : formData.inventory.quantity) * 2
-        )
-      })
-    };
-
-    // For updates, inventory will be handled automatically by backend
-    // based on the inventory form data
-
+    setIsSubmitting(true);
+    
     try {
+      // Client-side validation
+      if (!formData.name.trim()) {
+        showError('Product name is required');
+        return;
+      }
+      
+      if (formData.shortDescription.trim().length < 10) {
+        showError('Short description must be at least 10 characters');
+        return;
+      }
+      
+      if (!formData.description.trim()) {
+        showError('Product description is required');
+        return;
+      }
+      
+      if (!formData.category) {
+        showError('Please select a category');
+        return;
+      }
+      
+      const originalPrice = typeof formData.price.original === 'string' ? parseFloat(formData.price.original) || 0 : formData.price.original;
+      const sellingPrice = typeof formData.price.selling === 'string' ? parseFloat(formData.price.selling) || 0 : formData.price.selling;
+      
+      if (originalPrice <= 0 || sellingPrice <= 0) {
+        showError('Price must be greater than 0');
+        return;
+      }
+
+      const validImages = imageUrls
+        .filter(url => url.trim() !== '')
+        .map((url, index) => ({
+          url: url.trim(),
+          alt: formData.name,
+          isPrimary: index === 0
+        }));
+
+      // Prepare data for API
+      const finalProductData = {
+        name: formData.name,
+        slug: formData.slug,
+        description: formData.description,
+        shortDescription: formData.shortDescription,
+        categoryId: formData.category, // Send as categoryId, not category object
+        price: formData.price,
+        images: validImages,
+        ...(formData.video && { video: { url: formData.video } }), // Include video if provided
+        specifications: formData.specifications,
+        dimensions: formData.dimensions,
+        tags: formData.tags,
+        isFeatured: formData.isFeatured,
+        isActive: formData.isActive,
+        // For both new products and updates, send stock quantity
+        ...(product ? {
+          stockQuantity: formData.inventory.quantity // For updates, use stockQuantity
+        } : {
+          initialStock: formData.inventory.quantity, // For new products, use initialStock
+          reorderLevel: formData.inventory.threshold,
+          maxStockLevel: Math.max(
+            (typeof formData.inventory.quantity === 'string' ? parseInt(formData.inventory.quantity) || 0 : formData.inventory.quantity) + 1000,
+            (typeof formData.inventory.quantity === 'string' ? parseInt(formData.inventory.quantity) || 0 : formData.inventory.quantity) * 2
+          )
+        })
+      };
+
+      console.log('🎬 Product submission data:', finalProductData);
+      console.log('🎥 Video data being sent:', formData.video ? { url: formData.video } : 'No video');
+
       let result;
       if (product) {
         result = await dispatch(updateAdminProduct({ 
@@ -388,6 +404,8 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
       }
       
       showError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -645,56 +663,24 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
         </div>
 
         {/* Images */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-2">Product Images</label>
-          {imageUrls.map((url, index) => (
-            <div key={index} className="mb-3 p-3 border border-gray-200 rounded-md bg-gray-50">
-              <div className="flex items-center gap-2 mb-2">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleImageFileSelect(index, e.target.files?.[0] || null)}
-                  className="flex-1 text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-orange-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-medium file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
-                />
-                {index === 0 && (
-                  <span className="text-xs text-orange-600 font-medium bg-orange-100 px-2 py-1 rounded">PRIMARY</span>
-                )}
-                {imageUrls.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeImageUrl(index)}
-                    className="px-2 py-1 text-red-600 hover:bg-red-50 rounded text-xs border border-red-300"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-              
-              {url && (
-                <div className="mt-2">
-                  <img 
-                    src={url} 
-                    alt={`Product image ${index + 1}`}
-                    className="h-16 w-16 object-cover rounded border border-gray-200 shadow-sm"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    {index === 0 ? 'Primary image' : `Additional image ${index}`}
-                  </p>
-                </div>
-              )}
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={addImageUrl}
-            className="text-xs text-orange-600 border border-orange-300 rounded px-2 py-1 hover:bg-orange-50 flex items-center gap-1"
-          >
-            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add Another Image
-          </button>
-        </div>
+        <ImageUpload
+          images={imageUrls}
+          onImagesChange={setImageUrls}
+          maxFiles={10}
+          maxSizeMB={5}
+          label="Product Images"
+          required={false}
+        />
+
+        {/* Video Upload */}
+        <VideoUpload
+          video={formData.video}
+          onVideoChange={handleVideoChange}
+          maxSizeMB={50}
+          label="Product Video (Optional)"
+          required={false}
+          className="border border-gray-300 rounded-lg p-4"
+        />
 
         {/* Tags */}
         <div>
@@ -812,10 +798,18 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
           </button>
           <button
             type="submit"
-            disabled={productLoading}
-            className="px-3 py-1 bg-orange-600 text-white rounded text-xs hover:bg-orange-700 disabled:opacity-50"
+            disabled={productLoading || isSubmitting}
+            className="px-3 py-1 bg-orange-600 text-white rounded text-xs hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
           >
-            {productLoading ? 'Saving...' : (product ? 'Update' : 'Create')}
+            {(productLoading || isSubmitting) && (
+              <svg className="animate-spin h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            )}
+            <span>
+              {(productLoading || isSubmitting) ? 'Saving...' : (product ? 'Update Product' : 'Create Product')}
+            </span>
           </button>
         </div>
       </form>

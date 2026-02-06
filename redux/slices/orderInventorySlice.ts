@@ -70,7 +70,7 @@ export const getOrdersForInventorySync = createAsyncThunk(
       queryParams.append('sortOrder', 'desc');
 
       const response = await axios.get(
-        `${API_BASE_URL}/orders?${queryParams.toString()}`,
+        `${API_BASE_URL}/admin/orders?${queryParams.toString()}`,
         { headers: getAdminAuthHeaders() }
       );
       return response.data.data;
