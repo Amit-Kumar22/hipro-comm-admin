@@ -299,42 +299,135 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
     setIsSubmitting(true);
     
     try {
-      // Client-side validation
+      // Client-side validation with improved messaging
       if (!formData.name.trim()) {
-        showError('Product name is required');
+        showError('Product name is required and cannot be empty');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      if (formData.name.trim().length < 3) {
+        showError('Product name must be at least 3 characters long');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      if (!formData.shortDescription.trim()) {
+        showError('Short description is required');
+        setIsSubmitting(false);
         return;
       }
       
       if (formData.shortDescription.trim().length < 10) {
-        showError('Short description must be at least 10 characters');
+        showError('Short description must be at least 10 characters long');
+        setIsSubmitting(false);
         return;
       }
       
       if (!formData.description.trim()) {
-        showError('Product description is required');
+        showError('Product description is required and cannot be empty');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      if (formData.description.trim().length < 20) {
+        showError('Product description must be at least 20 characters long');
+        setIsSubmitting(false);
         return;
       }
       
       if (!formData.category) {
-        showError('Please select a category');
+        showError('Please select a category for this product');
+        setIsSubmitting(false);
         return;
       }
       
       const originalPrice = typeof formData.price.original === 'string' ? parseFloat(formData.price.original) || 0 : formData.price.original;
       const sellingPrice = typeof formData.price.selling === 'string' ? parseFloat(formData.price.selling) || 0 : formData.price.selling;
       
-      if (originalPrice <= 0 || sellingPrice <= 0) {
-        showError('Price must be greater than 0');
+      if (originalPrice <= 0) {
+        showError('Original price must be greater than 0');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      if (sellingPrice <= 0) {
+        showError('Selling price must be greater than 0');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      if (sellingPrice > originalPrice) {
+        showError('Selling price cannot be greater than original price');
+        setIsSubmitting(false);
         return;
       }
 
-      const validImages = imageUrls
-        .filter(url => url.trim() !== '')
-        .map((url, index) => ({
-          url: url.trim(),
-          alt: formData.name,
-          isPrimary: index === 0
-        }));
+      // Enhanced image validation
+      const validImages = imageUrls.filter(url => url.trim() !== '');
+      
+      if (validImages.length === 0) {
+        showError('At least one product image is required');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      if (validImages.length > 10) {
+        showError('Maximum 10 images are allowed per product');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Validate image URLs
+      for (let i = 0; i < validImages.length; i++) {
+        const url = validImages[i].trim();
+        if (!url.startsWith('/uploads/') && !url.startsWith('http://') && !url.startsWith('https://')) {
+          showError(`Image ${i + 1} has an invalid URL format`);
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      const processedImages = validImages.map((url, index) => ({
+        url: url.trim(),
+        alt: formData.name,
+        isPrimary: index === 0
+      }));
+
+      // Enhanced SKU validation
+      if (!formData.sku.trim()) {
+        showError('SKU (Stock Keeping Unit) is required');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      if (formData.sku.trim().length < 3) {
+        showError('SKU must be at least 3 characters long');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Enhanced inventory validation
+      const quantity = typeof formData.inventory.quantity === 'string' ? parseInt(formData.inventory.quantity) || 0 : formData.inventory.quantity;
+      const threshold = formData.inventory.threshold;
+      
+      if (quantity < 0) {
+        showError('Inventory quantity cannot be negative');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      if (threshold < 0) {
+        showError('Stock threshold cannot be negative');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      if (threshold > quantity) {
+        showError('Stock threshold cannot be greater than available quantity');
+        setIsSubmitting(false);
+        return;
+      }
 
       // Prepare data for API
       const finalProductData = {
@@ -392,18 +485,63 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
     } catch (error: any) {
       console.error('Error saving product:', error);
       
-      // Handle Redux error object structure
-      let errorMessage = 'Failed to save product. Please try again.';
+      // Enhanced error handling with specific messages
+      let errorMessage = 'Failed to save product. Please check all fields and try again.';
       
-      if (error && typeof error === 'object' && 'details' in error && Array.isArray((error as any).details)) {
-        // Handle validation errors from backend
-        errorMessage = error.details.map((d: any) => `${d.field}: ${d.message}`).join(', ');
-      } else if (error && typeof error === 'object' && 'message' in error) {
-        // Handle general error message
-        errorMessage = error.message;
+      if (error && typeof error === 'object') {
+        if ('details' in error && Array.isArray(error.details)) {
+          // Handle validation errors from backend
+          const validationErrors = error.details.map((d: any) => 
+            `${d.field ? d.field.charAt(0).toUpperCase() + d.field.slice(1) : 'Field'}: ${d.message}`
+          ).join('\n• ');
+          errorMessage = `Validation errors:\n• ${validationErrors}`;
+        } else if ('message' in error) {
+          // Handle general error message
+          errorMessage = error.message;
+          
+          // Provide specific guidance for common errors
+          if (error.message.includes('duplicate') || error.message.includes('already exists')) {
+            errorMessage += '\n\nTip: Please use a different product name or SKU.';
+          } else if (error.message.includes('validation')) {
+            errorMessage += '\n\nTip: Please check all required fields are filled correctly.';
+          } else if (error.message.includes('network') || error.message.includes('fetch')) {
+            errorMessage += '\n\nTip: Please check your internet connection and try again.';
+          } else if (error.message.includes('413') || error.message.includes('too large')) {
+            errorMessage = 'Files are too large. Please reduce image/video sizes to under 5MB for images and 50MB for videos.';
+          }
+        } else if ('code' in error) {
+          // Handle specific error codes
+          switch (error.code) {
+            case 11000:
+              errorMessage = 'A product with this name or SKU already exists. Please use unique values.';
+              break;
+            case 413:
+              errorMessage = 'Files are too large. Please reduce image sizes (max 5MB) and video sizes (max 50MB).';
+              break;
+            case 400:
+              errorMessage = 'Invalid data provided. Please check all fields and try again.';
+              break;
+            case 401:
+              errorMessage = 'Authentication failed. Please refresh the page and log in again.';
+              break;
+            case 403:
+              errorMessage = 'You do not have permission to perform this action.';
+              break;
+            case 500:
+              errorMessage = 'Server error occurred. Please try again in a few moments.';
+              break;
+            default:
+              errorMessage = `Error ${error.code}: ${error.message || 'Unknown error occurred'}`;
+          }
+        }
+      } else if (typeof error === 'string') {
+        errorMessage = error;
       }
       
+      // Show error without closing modal - user can fix issues and retry
       showError(errorMessage);
+      
+      // Important: Don't call onClose() here - keep modal open for user to fix issues
     } finally {
       setIsSubmitting(false);
     }

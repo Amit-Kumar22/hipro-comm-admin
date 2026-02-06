@@ -91,20 +91,68 @@ export default function CategoryModal({ isOpen, onClose, category, onSuccess }: 
     setIsSubmitting(true);
     
     try {
-      // Basic validation
+      // Enhanced validation with better messaging
       if (!formData.name.trim()) {
-        showError('Category name is required.');
+        showError('Category name is required and cannot be empty.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (formData.name.trim().length < 3) {
+        showError('Category name must be at least 3 characters long.');
+        setIsSubmitting(false);
         return;
       }
 
       if (!formData.description.trim()) {
-        showError('Category description is required.');
+        showError('Category description is required and cannot be empty.');
+        setIsSubmitting(false);
         return;
       }
 
       if (formData.description.trim().length < 10) {
-        showError('Description must be at least 10 characters long.');
+        showError('Category description must be at least 10 characters long.');
+        setIsSubmitting(false);
         return;
+      }
+
+      if (formData.description.trim().length > 500) {
+        showError('Category description cannot exceed 500 characters.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Validate images if provided
+      if (formData.images && formData.images.length > 0) {
+        const validImages = formData.images.filter(img => img.trim() !== '');
+        
+        if (validImages.length > 5) {
+          showError('Maximum 5 images are allowed per category.');
+          setIsSubmitting(false);
+          return;
+        }
+
+        for (let i = 0; i < validImages.length; i++) {
+          const imageUrl = validImages[i].trim();
+          if (!imageUrl.startsWith('/uploads/') && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
+            showError(`Image ${i + 1} has an invalid URL format.`);
+            setIsSubmitting(false);
+            return;
+          }
+        }
+      }
+
+      // Validate slug if provided
+      if (formData.slug && formData.slug.trim() !== '') {
+        const slug = formData.slug.trim();
+        if (!/^[a-z0-9-]+$/.test(slug)) {
+          showError('Category slug can only contain lowercase letters, numbers, and hyphens.');
+          return;
+        }
+        if (slug.length < 3) {
+          showError('Category slug must be at least 3 characters long.');
+          return;
+        }
       }
 
       const submitData = {
@@ -132,15 +180,63 @@ export default function CategoryModal({ isOpen, onClose, category, onSuccess }: 
     } catch (error: any) {
       console.error('❌ Error saving category:', error);
       
-      let errorMessage = 'Failed to save category. Please try again.';
+      // Enhanced error handling with specific messages
+      let errorMessage = 'Failed to save category. Please check all fields and try again.';
       
-      if (error && typeof error === 'object' && 'message' in error) {
-        errorMessage = error.message;
+      if (error && typeof error === 'object') {
+        if ('details' in error && Array.isArray(error.details)) {
+          // Handle validation errors from backend
+          const validationErrors = error.details.map((d: any) => 
+            `${d.field ? d.field.charAt(0).toUpperCase() + d.field.slice(1) : 'Field'}: ${d.message}`
+          ).join('\n• ');
+          errorMessage = `Validation errors:\n• ${validationErrors}`;
+        } else if ('message' in error) {
+          // Handle general error message
+          errorMessage = error.message;
+          
+          // Provide specific guidance for common errors
+          if (error.message.includes('duplicate') || error.message.includes('already exists')) {
+            errorMessage += '\n\nTip: Please use a different category name or slug.';
+          } else if (error.message.includes('validation')) {
+            errorMessage += '\n\nTip: Please check all required fields are filled correctly.';
+          } else if (error.message.includes('network') || error.message.includes('fetch')) {
+            errorMessage += '\n\nTip: Please check your internet connection and try again.';
+          } else if (error.message.includes('413') || error.message.includes('too large')) {
+            errorMessage = 'Image file is too large. Please reduce image size to under 5MB.';
+          }
+        } else if ('code' in error) {
+          // Handle specific error codes
+          switch (error.code) {
+            case 11000:
+              errorMessage = 'A category with this name already exists. Please use a unique name.';
+              break;
+            case 413:
+              errorMessage = 'Image file is too large. Please reduce image size to under 5MB.';
+              break;
+            case 400:
+              errorMessage = 'Invalid data provided. Please check all fields and try again.';
+              break;
+            case 401:
+              errorMessage = 'Authentication failed. Please refresh the page and log in again.';
+              break;
+            case 403:
+              errorMessage = 'You do not have permission to perform this action.';
+              break;
+            case 500:
+              errorMessage = 'Server error occurred. Please try again in a few moments.';
+              break;
+            default:
+              errorMessage = `Error ${error.code}: ${error.message || 'Unknown error occurred'}`;
+          }
+        }
       } else if (typeof error === 'string') {
         errorMessage = error;
       }
       
+      // Show error without closing modal - user can fix issues and retry
       showError(errorMessage);
+      
+      // Important: Don't call onClose() here - keep modal open for user to fix issues
     } finally {
       setIsSubmitting(false);
     }
