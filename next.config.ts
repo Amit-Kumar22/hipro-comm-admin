@@ -1,9 +1,23 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  reactCompiler: true,
+  /* Enhanced performance config without React Compiler */
+  
+  // Experimental optimizations
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'react-hot-toast', 'recharts'],
+    optimizeCss: true,
+  },
+  
+  // Performance optimizations
+  poweredByHeader: false,
+  compress: true,
+  
+  // Image optimization
   images: {
+    formats: ['image/webp', 'image/avif'],
+    deviceSizes: [640, 768, 1024, 1280, 1536],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
       {
         protocol: 'https',

@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_ENV=development next dev -p 3202",
+    "dev": "cross-env NODE_ENV=development NEXT_TELEMETRY_DISABLED=1 next dev -p 3202 --turbo",
+    "dev:fast": "cross-env NODE_ENV=development NEXT_TELEMETRY_DISABLED=1 next dev -p 3202 --turbo --experimental-https",
     "build": "next build",
-    "start": "next start -p 3202",
+    "build:analyze": "cross-env ANALYZE=true next build",
+    "start": "next start -p 3202", 
     "start:prod": "cross-env NODE_ENV=production next start -p 3202",
     "lint": "eslint"
   },

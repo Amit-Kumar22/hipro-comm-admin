@@ -249,107 +249,162 @@ export default function VideoUpload({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      {!selectedFile ? (
-        <div
-          className={`relative border-2 border-dashed rounded p-4 transition-colors ${
-            dragActive 
-              ? 'border-blue-400 bg-blue-50' 
-              : 'border-gray-300 hover:border-gray-400'
-          }`}
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={SUPPORTED_VIDEO_FORMATS.join(',')}
-            onChange={handleChange}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            required={required}
-          />
-          
-          <div className="text-center">
-            <Video className="mx-auto h-8 w-8 text-gray-400" />
-            <div className="mt-2">
-              <p className="text-sm font-medium text-gray-900">{label}</p>
-              <p className="text-xs text-gray-500 mt-1">Drop video here or click to browse</p>
-              <p className="text-xs text-gray-400 mt-1">Supports: MP4, WebM, OGG (max {maxSizeMB}MB)</p>
-            </div>
-          </div>
-          
-          {uploadStatus === 'uploading' && (
-            <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="text-xs text-gray-600 mt-2">Processing...</p>
-              </div>
-            </div>
-          )}
-        </div>
-      ) : (
+      {/* Display existing video if available and no new file selected */}
+      {video && !selectedFile && (
         <div className="space-y-2">
           <div className="relative bg-gray-100 rounded overflow-hidden">
             <video
-              ref={videoRef}
-              src={selectedFile.url}
+              src={video}
               className="w-full h-32 object-cover"
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
               onEnded={() => setIsPlaying(false)}
               muted
+              controls
             />
-            
-            <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center group">
-              <button
-                type="button"
-                onClick={togglePlay}
-                className="bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                {isPlaying ? (
-                  <Pause className="h-4 w-4 text-gray-800" />
-                ) : (
-                  <Play className="h-4 w-4 text-gray-800 ml-0.5" />
-                )}
-              </button>
-            </div>
 
             <button
               type="button"
-              onClick={removeVideo}
+              onClick={() => onVideoChange('')}
               className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1"
             >
               <X className="h-3 w-3" />
             </button>
           </div>
 
-          <div className="bg-gray-50 rounded p-2">
+          <div className="bg-green-50 rounded p-2 border border-green-200">
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-gray-900 truncate">{selectedFile.name}</p>
+                <p className="text-xs font-medium text-gray-900 truncate">Current Video</p>
                 <div className="flex items-center space-x-3 mt-1 text-xs text-gray-500">
-                  <span>{formatFileSize(selectedFile.size)}</span>
-                  {selectedFile.duration && <span>{formatDuration(selectedFile.duration)}</span>}
-                  <span className="uppercase">{selectedFile.type.split('/')[1]}</span>
+                  <span>{video.split('/').pop() || 'Video'}</span>
+                  <span className="text-green-600 font-medium">Active</span>
                 </div>
               </div>
               
-              {uploadStatus === 'success' && (
-                <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-              )}
-              
-              {selectedFile.error && (
-                <VideoErrorMessage 
-                  error={selectedFile.error}
-                  onRetry={() => {
-                    setSelectedFile({ ...selectedFile, error: undefined, isValid: true });
-                  }}
-                />
-              )}
+              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
             </div>
           </div>
+          
+          {/* Add new video option */}
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+            >
+              Replace Video
+            </button>
+          </div>
         </div>
+      )}
+
+      {/* Upload area - show if no existing video or user is replacing */}
+      {(!video || selectedFile) && (
+        <>
+          {!selectedFile ? (
+            <div
+              className={`relative border-2 border-dashed rounded p-4 transition-colors ${
+                dragActive 
+                  ? 'border-blue-400 bg-blue-50' 
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={SUPPORTED_VIDEO_FORMATS.join(',')}
+                onChange={handleChange}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                required={required}
+              />
+              
+              <div className="text-center">
+                <Video className="mx-auto h-8 w-8 text-gray-400" />
+                <div className="mt-2">
+                  <p className="text-sm font-medium text-gray-900">{label}</p>
+                  <p className="text-xs text-gray-500 mt-1">Drop video here or click to browse</p>
+                  <p className="text-xs text-gray-400 mt-1">Supports: MP4, WebM, OGG (max {maxSizeMB}MB)</p>
+                </div>
+              </div>
+              
+              {uploadStatus === 'uploading' && (
+                <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="text-xs text-gray-600 mt-2">Processing...</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="relative bg-gray-100 rounded overflow-hidden">
+                <video
+                  ref={videoRef}
+                  src={selectedFile.url}
+                  className="w-full h-32 object-cover"
+                  onPlay={() => setIsPlaying(true)}
+                  onPause={() => setIsPlaying(false)}
+                  onEnded={() => setIsPlaying(false)}
+                  muted
+                />
+                
+                <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center group">
+                  <button
+                    type="button"
+                    onClick={togglePlay}
+                    className="bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    {isPlaying ? (
+                      <Pause className="h-4 w-4 text-gray-800" />
+                    ) : (
+                      <Play className="h-4 w-4 text-gray-800 ml-0.5" />
+                    )}
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={removeVideo}
+                  className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+
+              <div className="bg-gray-50 rounded p-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-900 truncate">{selectedFile.name}</p>
+                    <div className="flex items-center space-x-3 mt-1 text-xs text-gray-500">
+                      <span>{formatFileSize(selectedFile.size)}</span>
+                      {selectedFile.duration && <span>{formatDuration(selectedFile.duration)}</span>}
+                      <span className="uppercase">{selectedFile.type.split('/')[1]}</span>
+                    </div>
+                  </div>
+                  
+                  {uploadStatus === 'success' && (
+                    <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  )}
+                  
+                  {selectedFile.error && (
+                    <VideoErrorMessage 
+                      error={selectedFile.error}
+                      onRetry={() => {
+                        setSelectedFile({ ...selectedFile, error: undefined, isValid: true });
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

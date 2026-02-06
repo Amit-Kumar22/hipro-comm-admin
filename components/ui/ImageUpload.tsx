@@ -62,10 +62,10 @@ export default function ImageUpload({
 
   const processFiles = (files: FileList) => {
     const fileArray = Array.from(files);
-    const totalFiles = selectedFiles.length + fileArray.length;
+    const totalFiles = selectedFiles.length + fileArray.length + images.length; // Include existing images
 
     if (totalFiles > maxFiles) {
-      alert(`Maximum ${maxFiles} images allowed. You're trying to add ${fileArray.length} more files, but only ${maxFiles - selectedFiles.length} slots are available.`);
+      alert(`Maximum ${maxFiles} images allowed. You're trying to add ${fileArray.length} more files, but only ${maxFiles - selectedFiles.length - images.length} slots are available.`);
       return;
     }
 
@@ -218,6 +218,100 @@ export default function ImageUpload({
           </div>
         </div>
       </div>
+
+      {/* Existing Images Display */}
+      {images.length > 0 && selectedFiles.length === 0 && (
+        <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-2">
+              <ImageIcon className="h-4 w-4 text-gray-600" />
+              <h4 className="text-sm font-medium text-gray-700">
+                Current Images ({images.length})
+              </h4>
+            </div>
+            <button
+              type="button"
+              onClick={() => onImagesChange([])}
+              className="text-xs text-red-600 hover:text-red-700 font-medium"
+            >
+              Clear All
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {images.map((imageUrl, index) => (
+              <div
+                key={index}
+                className="relative border rounded-lg p-3 border-green-200 bg-green-50"
+              >
+                <div className="flex items-start space-x-3">
+                  {/* Image Preview */}
+                  <div className="flex-shrink-0">
+                    <img
+                      src={imageUrl}
+                      alt={`Current image ${index + 1}`}
+                      className="h-12 w-12 object-cover rounded border"
+                      onError={(e) => {
+                        const img = e.target as HTMLImageElement;
+                        img.style.display = 'none';
+                        const container = img.parentElement;
+                        if (container) {
+                          container.innerHTML = '<div class="h-12 w-12 bg-gray-200 rounded border flex items-center justify-center"><span class="text-gray-400 text-xs">No Image</span></div>';
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {/* File Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-700 truncate" title={imageUrl}>
+                      {imageUrl.split('/').pop() || 'Image'}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Current Image • {imageUrl.includes('data:') ? 'Base64' : 'URL'}
+                    </p>
+                    
+                    {/* Status */}
+                    <div className="flex items-center space-x-1 mt-1">
+                      <CheckCircle className="h-3 w-3 text-green-500" />
+                      <span className="text-xs text-green-600 font-medium">Current</span>
+                      {index === 0 && (
+                        <span className="text-xs bg-blue-100 text-blue-700 px-1 py-0.5 rounded">
+                          Primary
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Remove Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updatedImages = images.filter((_, i) => i !== index);
+                      onImagesChange(updatedImages);
+                    }}
+                    className="flex-shrink-0 text-red-500 hover:text-red-700"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Summary */}
+          <div className="mt-3 pt-3 border-t border-gray-200">
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">
+                Current Images: <span className="text-green-600 font-medium">{images.length}</span>
+              </span>
+              <span className="text-gray-600">
+                Available Slots: <span className="font-medium">{maxFiles - images.length}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Selected Files Preview */}
       {selectedFiles.length > 0 && (
