@@ -134,8 +134,22 @@ export default function CategoryModal({ isOpen, onClose, category, onSuccess }: 
 
         for (let i = 0; i < validImages.length; i++) {
           const imageUrl = validImages[i].trim();
-          if (!imageUrl.startsWith('/uploads/') && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
-            showError(`Image ${i + 1} has an invalid URL format.`);
+          
+          // Allow various URL formats:
+          // - Server uploads: /uploads/ or full URLs with uploads
+          // - External URLs: http:// or https://
+          // - Local preview: data: (base64) or blob: URLs
+          const isValidUrl = 
+            imageUrl.startsWith('/uploads/') ||           // Server relative path
+            imageUrl.startsWith('http://') ||             // HTTP URL
+            imageUrl.startsWith('https://') ||            // HTTPS URL
+            imageUrl.startsWith('data:image/') ||         // Base64 data URL
+            imageUrl.startsWith('blob:') ||               // Blob URL (local preview)
+            imageUrl.includes('/uploads/images/') ||      // Full server URL with uploads path
+            imageUrl.includes('/uploads/videos/');        // Video uploads path
+          
+          if (!isValidUrl) {
+            showError(`Image ${i + 1} has an invalid URL format. Expected formats: server uploads, HTTP/HTTPS URLs, or data URLs.`);
             setIsSubmitting(false);
             return;
           }
@@ -176,9 +190,14 @@ export default function CategoryModal({ isOpen, onClose, category, onSuccess }: 
       }
 
       onSuccess?.();
+      console.log('✅ Category save successful, closing modal');
+      console.log('🚀 Calling onClose now...');
       onClose();
+      console.log('✅ Modal close called successfully');
     } catch (error: any) {
       console.error('❌ Error saving category:', error);
+      console.log('🚪 Modal should stay open - NOT calling onClose()');
+      console.log('🔒 Confirming: onClose will NOT be called in error block');
       
       // Enhanced error handling with specific messages
       let errorMessage = 'Failed to save category. Please check all fields and try again.';
