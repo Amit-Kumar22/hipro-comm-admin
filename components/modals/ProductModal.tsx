@@ -59,6 +59,11 @@ interface ProductFormData {
   tags: string[];
   isActive: boolean;
   isFeatured: boolean;
+  returnPolicy: string;
+  whatsInTheBox: Array<{
+    component: string;
+    quantity: number;
+  }>;
 }
 
 export default function ProductModal({ isOpen, onClose, product, onSuccess }: ProductModalProps) {
@@ -91,12 +96,16 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
     tags: [],
     isActive: true,
     isFeatured: false,
+    returnPolicy: '',
+    whatsInTheBox: [],
   });
 
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [specKey, setSpecKey] = useState('');
   const [specValue, setSpecValue] = useState('');
+  const [boxComponent, setBoxComponent] = useState('');
+  const [boxQuantity, setBoxQuantity] = useState<number>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Handle video change
@@ -162,6 +171,8 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
         tags: product.tags || [],
         isActive: product.isActive ?? true,
         isFeatured: product.isFeatured ?? false,
+        returnPolicy: product.returnPolicy || '',
+        whatsInTheBox: product.whatsInTheBox || [],
       });
       setImageUrls(product.images?.map((img: any) => img.url) || []);
     } else {
@@ -189,6 +200,8 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
         tags: [],
         isActive: true,
         isFeatured: false,
+        returnPolicy: '',
+        whatsInTheBox: [],
       });
       setImageUrls([]);
     }
@@ -289,6 +302,27 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
     setFormData(prev => ({
       ...prev,
       specifications: prev.specifications.filter((_, index) => index !== indexToRemove)
+    }));
+  };
+
+  const addBoxComponent = () => {
+    if (boxComponent.trim() && boxQuantity > 0) {
+      setFormData(prev => ({
+        ...prev,
+        whatsInTheBox: [...prev.whatsInTheBox, {
+          component: boxComponent.trim(),
+          quantity: boxQuantity
+        }]
+      }));
+      setBoxComponent('');
+      setBoxQuantity(1);
+    }
+  };
+
+  const removeBoxComponent = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      whatsInTheBox: prev.whatsInTheBox.filter((_, i) => i !== index)
     }));
   };
 
@@ -465,6 +499,8 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
         tags: formData.tags,
         isFeatured: formData.isFeatured,
         isActive: formData.isActive,
+        returnPolicy: formData.returnPolicy,
+        whatsInTheBox: formData.whatsInTheBox,
         // For both new products and updates, send stock quantity
         ...(product ? {
           stockQuantity: formData.inventory.quantity // For updates, use stockQuantity
@@ -932,6 +968,66 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
             <button
               type="button"
               onClick={addSpecification}
+              className="px-2 py-1 bg-orange-600 text-white rounded text-xs hover:bg-orange-700"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+
+        {/* Return Policy */}
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Return Policy</label>
+          <textarea
+            value={formData.returnPolicy}
+            onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: e.target.value }))}
+            placeholder="Enter return policy details..."
+            rows={3}
+            className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 resize-none"
+          />
+        </div>
+
+        {/* What's in the Box */}
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">What&apos;s in the Box</label>
+          <div className="space-y-1 mb-2 max-h-32 overflow-y-auto">
+            {formData.whatsInTheBox.map((item, index) => (
+              <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-0.5 rounded">
+                    {item.quantity}x
+                  </span>
+                  <span className="text-sm">{item.component}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeBoxComponent(index)}
+                  className="px-2 py-1 text-red-600 hover:bg-red-100 rounded text-xs"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={boxComponent}
+              onChange={(e) => setBoxComponent(e.target.value)}
+              placeholder="Component name"
+              className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
+            />
+            <input
+              type="number"
+              value={boxQuantity}
+              onChange={(e) => setBoxQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+              placeholder="Qty"
+              min="1"
+              className="w-16 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
+            />
+            <button
+              type="button"
+              onClick={addBoxComponent}
               className="px-2 py-1 bg-orange-600 text-white rounded text-xs hover:bg-orange-700"
             >
               Add

@@ -53,6 +53,11 @@ export interface AdminProduct {
     isOutOfStock: boolean;
     availableForSale: number;
   };
+  returnPolicy?: string;
+  whatsInTheBox?: Array<{
+    component: string;
+    quantity: number;
+  }>;
   createdAt: string;
   updatedAt: string;
 }

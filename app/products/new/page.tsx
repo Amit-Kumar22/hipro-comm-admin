@@ -32,6 +32,11 @@ interface ProductFormData {
   tags: string[];
   isActive: boolean;
   isFeatured: boolean;
+  returnPolicy: string;
+  whatsInTheBox: Array<{
+    component: string;
+    quantity: number;
+  }>;
 }
 
 export default function AddProductPage() {
@@ -64,12 +69,16 @@ export default function AddProductPage() {
     tags: [],
     isActive: true,
     isFeatured: false,
+    returnPolicy: '',
+    whatsInTheBox: [],
   });
 
   const [imageUrls, setImageUrls] = useState<string[]>(['']);
   const [tagInput, setTagInput] = useState('');
   const [specKey, setSpecKey] = useState('');
   const [specValue, setSpecValue] = useState('');
+  const [boxComponent, setBoxComponent] = useState('');
+  const [boxQuantity, setBoxQuantity] = useState<number>(1);
 
   useEffect(() => {
     dispatch(getAdminCategories({ includeInactive: false }));
@@ -174,6 +183,27 @@ export default function AddProductPage() {
     setProductData(prev => ({
       ...prev,
       specifications: newSpecs
+    }));
+  };
+
+  const addBoxComponent = () => {
+    if (boxComponent.trim() && boxQuantity > 0) {
+      setProductData(prev => ({
+        ...prev,
+        whatsInTheBox: [...prev.whatsInTheBox, {
+          component: boxComponent.trim(),
+          quantity: boxQuantity
+        }]
+      }));
+      setBoxComponent('');
+      setBoxQuantity(1);
+    }
+  };
+
+  const removeBoxComponent = (index: number) => {
+    setProductData(prev => ({
+      ...prev,
+      whatsInTheBox: prev.whatsInTheBox.filter((_, i) => i !== index)
     }));
   };
 
@@ -606,6 +636,68 @@ export default function AddProductPage() {
                 Add
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Return Policy Section */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Return Policy</h2>
+          
+          <textarea
+            value={productData.returnPolicy}
+            onChange={(e) => setProductData(prev => ({ ...prev, returnPolicy: e.target.value }))}
+            placeholder="Enter return policy details..."
+            rows={4}
+            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+        </div>
+
+        {/* What's in the Box Section */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">What&apos;s in the Box</h2>
+          <p className="text-sm text-gray-600 mb-4">Add components that come with this product</p>
+          
+          <div className="space-y-2 mb-4">
+            {productData.whatsInTheBox.map((item, index) => (
+              <div key={index} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">{item.quantity}x</span>
+                  <span className="text-sm">{item.component}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeBoxComponent(index)}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <input
+              type="text"
+              value={boxComponent}
+              onChange={(e) => setBoxComponent(e.target.value)}
+              placeholder="Component name"
+              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            <input
+              type="number"
+              value={boxQuantity}
+              onChange={(e) => setBoxQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+              placeholder="Quantity"
+              min="1"
+              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            <button
+              type="button"
+              onClick={addBoxComponent}
+              className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700"
+            >
+              Add Component
+            </button>
           </div>
         </div>
 
