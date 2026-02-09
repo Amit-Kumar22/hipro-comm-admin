@@ -10,7 +10,7 @@ const config = {
     baseURL:
       process.env.NEXT_PUBLIC_API_URL ||
       (isBrowser && window.location.hostname === 'localhost'
-        ? 'http://localhost:5000/api/v1'
+        ? 'http://localhost:5001/api/v1'
         : 'https://shop.hiprotech.org/api/v1'),
 
     // Endpoint paths (relative to baseURL)

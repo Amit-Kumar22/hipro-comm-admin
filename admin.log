@@ -1,0 +1,15 @@
+
+> hipro-comm-admin@0.1.0 dev
+> cross-env NODE_ENV=development NEXT_TELEMETRY_DISABLED=1 next dev -p 3202 --turbo --port 3202
+
+▲ Next.js 16.1.1 (Turbopack)
+- Local:         http://localhost:3202
+- Network:       http://192.168.29.32:3202
+- Environments: .env.local, .env.development, .env
+- Experiments (use with caution):
+  ✓ optimizeCss
+  · optimizePackageImports
+
+✓ Starting...
+✓ Ready in 393ms
+ GET / 200 in 2.4s (compile: 2.3s, render: 122ms)

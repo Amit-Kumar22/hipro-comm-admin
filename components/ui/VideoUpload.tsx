@@ -130,7 +130,7 @@ export default function VideoUpload({
       const formData = new FormData();
       formData.append('video', file);
       
-      const apiBaseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+      const apiBaseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api/v1';
       const uploadUrl = `${apiBaseURL}/upload/video`;
       const adminToken = localStorage.getItem('adminToken');
 

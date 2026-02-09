@@ -111,30 +111,30 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
+      <div className="max-w-7xl mx-auto p-3 space-y-4">
         {/* Enhanced Professional Header */}
-        <div className="bg-gradient-to-r from-white via-blue-50 to-indigo-50 border border-blue-200/50 rounded-xl shadow-lg backdrop-blur-sm">
-          <div className="p-8">
+        <div className="bg-gradient-to-r from-white via-blue-50 to-indigo-50 rounded-lg shadow-sm backdrop-blur-sm">
+          <div className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-semibold bg-gradient-to-r from-slate-800 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
                   Dashboard
                 </h1>
-                <p className="text-slate-600 mt-2 text-lg">
+                <p className="text-slate-600 mt-1 text-sm">
                   Welcome back! Here's what's happening with your business today.
                 </p>
               </div>
-              <div className="hidden md:flex items-center space-x-4">
-                <div className="bg-white/70 backdrop-blur-sm border border-blue-200 px-4 py-2 rounded-xl shadow-sm">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-slate-700 font-semibold">Live Data</span>
+              <div className="hidden md:flex items-center space-x-2">
+                <div className="bg-white/70 backdrop-blur-sm px-2 py-1 rounded-lg shadow-sm">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-slate-700 font-medium text-sm">Live Data</span>
                   </div>
                 </div>
-                <div className="bg-white/70 backdrop-blur-sm border border-blue-200 px-4 py-2 rounded-xl shadow-sm">
-                  <div className="flex items-center space-x-3">
-                    <Activity className="h-5 w-5 text-blue-600" />
-                    <span className="text-slate-700 font-semibold">System Healthy</span>
+                <div className="bg-white/70 backdrop-blur-sm px-2 py-1 rounded-lg shadow-sm">
+                  <div className="flex items-center space-x-2">
+                    <Activity className="h-4 w-4 text-blue-600" />
+                    <span className="text-slate-700 font-medium text-sm">System Healthy</span>
                   </div>
                 </div>
               </div>
@@ -143,138 +143,138 @@ export default function AdminDashboard() {
         </div>
 
         {/* Enhanced Metrics Grid with Gradients */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {loading ? (
             Array(4).fill(0).map((_, i) => <MetricCardSkeleton key={i} />)
           ) : (
             <>
-              <div className="bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                <div className="p-6 text-white">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
-                      <Users className="h-6 w-6 text-white" />
+              <div className="bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="p-4 text-white">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="bg-white/20 backdrop-blur-sm p-2 rounded-lg">
+                      <Users className="h-5 w-5 text-white" />
                     </div>
                     <div className="text-right">
-                      <div className="text-gray-100 text-sm font-medium">+12.5%</div>
+                      <div className="text-gray-100 text-xs font-medium">+12.5%</div>
                     </div>
                   </div>
-                  <div className="text-3xl font-bold mb-2">
+                  <div className="text-2xl font-semibold mb-1">
                     {(dashboardStats?.overview?.totalUsers || 1250).toLocaleString()}
                   </div>
-                  <div className="text-gray-100 font-medium">Total Users</div>
-                  <div className="text-gray-200 text-sm mt-1">+12.5% from last month</div>
+                  <div className="text-gray-100 font-medium text-sm">Total Users</div>
+                  <div className="text-gray-200 text-xs mt-0.5">+12.5% from last month</div>
                 </div>
               </div>
               
-              <div className="bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                <div className="p-6 text-white">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
-                      <Package className="h-6 w-6 text-white" />
+              <div className="bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="p-4 text-white">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="bg-white/20 backdrop-blur-sm p-2 rounded-lg">
+                      <Package className="h-5 w-5 text-white" />
                     </div>
                     <div className="text-right">
-                      <div className="text-gray-100 text-sm font-medium">+8.2%</div>
+                      <div className="text-gray-100 text-xs font-medium">+8.2%</div>
                     </div>
                   </div>
-                  <div className="text-3xl font-bold mb-2">
+                  <div className="text-2xl font-semibold mb-1">
                     {(dashboardStats?.overview?.totalProducts || 3).toLocaleString()}
                   </div>
-                  <div className="text-gray-100 font-medium">Products</div>
-                  <div className="text-gray-200 text-sm mt-1">+8.2% from last month</div>
+                  <div className="text-gray-100 font-medium text-sm">Products</div>
+                  <div className="text-gray-200 text-xs mt-0.5">+8.2% from last month</div>
                 </div>
               </div>
               
-              <div className="bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                <div className="p-6 text-white">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
-                      <ShoppingBag className="h-6 w-6 text-white" />
+              <div className="bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="p-4 text-white">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="bg-white/20 backdrop-blur-sm p-2 rounded-lg">
+                      <ShoppingBag className="h-5 w-5 text-white" />
                     </div>
                     <div className="text-right">
-                      <div className="text-gray-100 text-sm font-medium">+23.1%</div>
+                      <div className="text-gray-100 text-xs font-medium">+23.1%</div>
                     </div>
                   </div>
-                  <div className="text-3xl font-bold mb-2">
+                  <div className="text-2xl font-semibold mb-1">
                     {(dashboardStats?.overview?.totalOrders || 2340).toLocaleString()}
                   </div>
-                  <div className="text-gray-100 font-medium">Total Orders</div>
-                  <div className="text-gray-200 text-sm mt-1">+23.1% from last month</div>
+                  <div className="text-gray-100 font-medium text-sm">Total Orders</div>
+                  <div className="text-gray-200 text-xs mt-0.5">+23.1% from last month</div>
                 </div>
               </div>
               
-              <div className="bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                <div className="p-6 text-white">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
-                      <DollarSign className="h-6 w-6 text-white" />
+              <div className="bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="p-4 text-white">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="bg-white/20 backdrop-blur-sm p-2 rounded-lg">
+                      <DollarSign className="h-5 w-5 text-white" />
                     </div>
                     <div className="text-right">
-                      <div className="text-gray-100 text-sm font-medium">+15.8%</div>
+                      <div className="text-gray-100 text-xs font-medium">+15.8%</div>
                     </div>
                   </div>
-                  <div className="text-3xl font-bold mb-2">
+                  <div className="text-2xl font-semibold mb-1">
                     ₹{(420000).toLocaleString('en-IN')}
                   </div>
-                  <div className="text-gray-100 font-medium">Revenue</div>
-                  <div className="text-gray-200 text-sm mt-1">+15.8% from last month</div>
+                  <div className="text-gray-100 font-medium text-sm">Revenue</div>
+                  <div className="text-gray-200 text-xs mt-0.5">+15.8% from last month</div>
                 </div>
               </div>
             </>
           )}
         </div>
 
-        {/* Enhanced Charts Section with Modern Design */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Compact Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Sales Analytics */}
-          <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-            <div className="p-6 border-b border-slate-200/50">
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900">Sales Analytics</h3>
-                  <p className="text-slate-600 mt-1">Monthly performance overview</p>
+                  <h3 className="text-lg font-semibold text-slate-900">Sales Analytics</h3>
+                  <p className="text-slate-600 text-sm mt-0.5">Monthly performance overview</p>
                 </div>
-                <div className="flex items-center space-x-2 text-emerald-700 bg-gradient-to-r from-emerald-50 to-green-50 px-4 py-2 rounded-xl border border-emerald-200">
-                  <TrendingUp className="h-5 w-5" />
-                  <span className="font-bold text-sm">+18.2%</span>
+                <div className="flex items-center space-x-1 text-emerald-700 bg-gradient-to-r from-emerald-50 to-green-50 px-2 py-1 rounded-lg">
+                  <TrendingUp className="h-4 w-4" />
+                  <span className="font-semibold text-xs">+18.2%</span>
                 </div>
               </div>
             </div>
-            <div className="p-6">
+            <div className="p-4">
               <SalesChart data={salesData} />
             </div>
           </div>
 
           {/* Revenue Trend */}
-          <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-            <div className="p-6 border-b border-slate-200/50">
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900">Weekly Revenue</h3>
-                  <p className="text-slate-600 mt-1">Last 7 days performance</p>
+                  <h3 className="text-lg font-semibold text-slate-900">Weekly Revenue</h3>
+                  <p className="text-slate-600 text-sm mt-0.5">Last 7 days performance</p>
                 </div>
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-3 rounded-xl">
-                  <Activity className="h-5 w-5 text-blue-600" />
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-2 rounded-lg">
+                  <Activity className="h-4 w-4 text-blue-600" />
                 </div>
               </div>
             </div>
-            <div className="p-6">
+            <div className="p-4">
               <RevenueLineChart data={revenueData} />
             </div>
           </div>
         </div>
 
-        {/* Enhanced Additional Analytics */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Compact Additional Analytics */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Category Distribution */}
-          <div className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-            <div className="p-6 border-b border-slate-200/50">
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900">Product Distribution</h3>
-                  <p className="text-slate-600 mt-1">By categories</p>
+                  <h3 className="text-lg font-semibold text-slate-900">Product Distribution</h3>
+                  <p className="text-slate-600 text-sm mt-0.5">By categories</p>
                 </div>
-                <div className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 p-3 rounded-xl">
-                  <Target className="h-5 w-5 text-orange-600" />
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 p-2 rounded-lg">
+                  <Target className="h-4 w-4 text-orange-600" />
                 </div>
               </div>
             </div>

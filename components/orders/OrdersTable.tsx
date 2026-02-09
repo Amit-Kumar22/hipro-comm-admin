@@ -47,7 +47,7 @@ export default function OrdersTable() {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/admin/verify/${paymentId}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
         }
       });
@@ -74,7 +74,7 @@ export default function OrdersTable() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/admin/verify`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({

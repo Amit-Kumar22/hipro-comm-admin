@@ -6,6 +6,7 @@ import inventoryReducer from './slices/inventorySlice';
 import orderInventoryReducer from './slices/orderInventorySlice';
 import adminOrdersReducer from './slices/adminOrdersSlice';
 import adminReducer from './slices/adminSlice';
+import paymentVerificationReducer from './slices/paymentVerificationSlice';
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     orderInventory: orderInventoryReducer,
     adminOrders: adminOrdersReducer,
     admin: adminReducer,
+    paymentVerification: paymentVerificationReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',
   middleware: (getDefaultMiddleware) =>
