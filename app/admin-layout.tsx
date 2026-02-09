@@ -165,8 +165,8 @@ export default function AdminLayout({
         </InventorySyncService>
       </main>
       
-      {/* Inventory Status Indicator */}
-      <InventoryStatusIndicator />
+      {/* Inventory Status Indicator - Removed as per request */}
+      {/* <InventoryStatusIndicator /> */}
       
       {/* Notification System */}
       <NotificationSystem />
