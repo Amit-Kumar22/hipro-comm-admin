@@ -25,13 +25,21 @@ interface AdminCategoriesState {
   currentCategory: AdminCategory | null;
   loading: boolean;
   error: string | null;
-  pagination: {
-    totalCount: number;
-    totalPages: number;
-    currentPage: number;
-    hasNext: boolean;
-    hasPrev: boolean;
-    limit: number;
+  
+  // Standardized pagination and search state
+  page: number;
+  size: number;
+  totalPages: number;
+  totalElements: number;
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
+  search: string;
+  
+  // Filters
+  filters: {
+    includeInactive?: boolean;
+    parentOnly?: boolean;
+    parentCategory?: string;
   };
 }
 
@@ -40,14 +48,18 @@ const initialState: AdminCategoriesState = {
   currentCategory: null,
   loading: false,
   error: null,
-  pagination: {
-    totalCount: 0,
-    totalPages: 0,
-    currentPage: 1,
-    hasNext: false,
-    hasPrev: false,
-    limit: 10,
-  },
+  
+  // Standardized pagination and search state
+  page: 1,
+  size: 20,
+  totalPages: 0,
+  totalElements: 0,
+  sortBy: 'sortOrder',
+  sortOrder: 'asc',
+  search: '',
+  
+  // Filters
+  filters: {},
 };
 
 // Admin Get Categories
@@ -55,41 +67,35 @@ export const getAdminCategories = createAsyncThunk(
   'adminCategories/getCategories',
   async (params: {
     page?: number;
-    limit?: number;
+    size?: number;
     search?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
     includeInactive?: boolean;
     parentCategory?: string;
+    parentOnly?: boolean;
   } = {}, { rejectWithValue }) => {
     try {
       const queryParams = new URLSearchParams();
       
+      // Standardized pagination params
       if (params.page) queryParams.append('page', params.page.toString());
-      if (params.limit) queryParams.append('limit', params.limit.toString());
+      if (params.size) queryParams.append('size', params.size.toString());
+      if (params.sortBy) queryParams.append('sortBy', params.sortBy);
+      if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
       if (params.search) queryParams.append('search', params.search);
+      
+      // Category-specific filters  
       if (params.includeInactive !== undefined) queryParams.append('includeInactive', params.includeInactive.toString());
       if (params.parentCategory) queryParams.append('parentCategory', params.parentCategory);
+      if (params.parentOnly !== undefined) queryParams.append('parentOnly', params.parentOnly.toString());
 
       const response = await axios.get(
         `${API_BASE_URL}/categories?${queryParams.toString()}`,
         { headers: getAdminAuthHeaders() }
       );
 
-      // Safely handle the API response structure
-      const responseData = response.data?.data || response.data || {};
-      const categories = responseData.categories || responseData || [];
-      const pagination = responseData.pagination || {
-        totalCount: Array.isArray(categories) ? categories.length : 0,
-        totalPages: 1,
-        currentPage: 1,
-        hasNext: false,
-        hasPrev: false,
-        limit: 10,
-      };
-
-      return {
-        categories: Array.isArray(categories) ? categories : [],
-        pagination
-      };
+      return response.data;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to fetch categories';
       return rejectWithValue(errorMessage);
@@ -188,6 +194,33 @@ const adminCategoriesSlice = createSlice({
     clearCurrentAdminCategory: (state) => {
       state.currentCategory = null;
     },
+    
+    // Standardized pagination and search actions
+    setPage: (state, action) => {
+      state.page = action.payload;
+    },
+    setSize: (state, action) => {
+      state.size = action.payload;
+    },
+    setSortBy: (state, action) => {
+      state.sortBy = action.payload;
+    },
+    setSortOrder: (state, action) => {
+      state.sortOrder = action.payload;
+    },
+    setSearch: (state, action) => {
+      state.search = action.payload;
+    },
+    setFilters: (state, action) => {
+      state.filters = { ...state.filters, ...action.payload };
+    },
+    
+    // Reset to initial state
+    resetCategoriesState: (state) => {
+      state.page = 1;
+      state.search = '';
+      state.filters = {};
+    },
   },
   extraReducers: (builder) => {
     // Get Admin Categories
@@ -198,15 +231,21 @@ const adminCategoriesSlice = createSlice({
       })
       .addCase(getAdminCategories.fulfilled, (state, action) => {
         state.loading = false;
-        state.categories = action.payload?.categories || [];
-        state.pagination = action.payload?.pagination || initialState.pagination;
+        state.categories = action.payload?.data || [];
+        
+        // Update standardized pagination state
+        if (action.payload.pageable) {
+          state.page = action.payload.pageable.page;
+          state.size = action.payload.pageable.size;
+          state.totalPages = action.payload.pageable.totalPages;
+          state.totalElements = action.payload.pageable.totalElements;
+        }
       })
       .addCase(getAdminCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
         // Ensure categories is always an array even on error
         state.categories = [];
-        state.pagination = initialState.pagination;
       });
 
     // Get Admin Category
@@ -233,7 +272,7 @@ const adminCategoriesSlice = createSlice({
       .addCase(createAdminCategory.fulfilled, (state, action) => {
         state.loading = false;
         state.categories.unshift(action.payload);
-        state.pagination.totalCount += 1;
+        state.totalElements += 1;
       })
       .addCase(createAdminCategory.rejected, (state, action) => {
         state.loading = false;
@@ -270,7 +309,7 @@ const adminCategoriesSlice = createSlice({
       .addCase(deleteAdminCategory.fulfilled, (state, action) => {
         state.loading = false;
         state.categories = state.categories.filter(c => c._id !== action.payload);
-        state.pagination.totalCount -= 1;
+        state.totalElements = Math.max(0, state.totalElements - 1);
         if (state.currentCategory?._id === action.payload) {
           state.currentCategory = null;
         }
@@ -284,7 +323,14 @@ const adminCategoriesSlice = createSlice({
 
 export const { 
   clearAdminCategoriesError, 
-  clearCurrentAdminCategory 
+  clearCurrentAdminCategory,
+  setPage,
+  setSize,
+  setSortBy,
+  setSortOrder,
+  setSearch,
+  setFilters,
+  resetCategoriesState
 } = adminCategoriesSlice.actions;
 
 export default adminCategoriesSlice.reducer;

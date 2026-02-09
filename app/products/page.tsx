@@ -1,8 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { getAdminProducts, deleteAdminProduct } from '@/redux/slices/adminProductsSlice';
+import { 
+  getAdminProducts, 
+  deleteAdminProduct,
+  setPage,
+  setSize,
+  setSortBy,
+  setSortOrder,
+  setSearch,
+  setAdminProductsFilters
+} from '@/redux/slices/adminProductsSlice';
 import { getAdminCategories } from '@/redux/slices/adminCategoriesSlice';
 import ProductModal from '@/components/modals/ProductModal';
 import { 
@@ -34,23 +43,77 @@ import {
 
 export default function AdminProductsPage() {
   const dispatch = useAppDispatch();
-  const { products, loading: productsLoading, error: productsError } = useAppSelector(
-    (state) => state.adminProducts
-  );
+  
+  // Get standardized state from Redux
+  const { 
+    products, 
+    loading: productsLoading, 
+    error: productsError,
+    page,
+    size,
+    totalPages,
+    totalElements,
+    sortBy,
+    sortOrder,
+    search,
+    filters
+  } = useAppSelector((state) => state.adminProducts);
+  
   const { categories } = useAppSelector((state) => state.adminCategories);
 
+  // Local UI state
   const [showModal, setShowModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  
+  // Local filter state for UI (before dispatching to Redux)
+  const [localSearch, setLocalSearch] = useState(search);
+  const [categoryFilter, setCategoryFilter] = useState(filters.category || 'all');
+  const [statusFilter, setStatusFilter] = useState(
+    filters.isActive === true ? 'active' :
+    filters.isActive === false ? 'inactive' : 'all'
+  );
 
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    (() => {
+      let timeoutId: NodeJS.Timeout;
+      return (searchTerm: string) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          dispatch(setSearch(searchTerm));
+          dispatch(setPage(1)); // Reset to first page on search
+        }, 500);
+      };
+    })(),
+    [dispatch]
+  );
+
+  // Load data effect
   useEffect(() => {
-    dispatch(getAdminProducts({ page: 1, limit: 50, sortBy: 'createdAt', sortOrder: 'desc' }));
-    dispatch(getAdminCategories({ includeInactive: false }));
+    // Load products with current Redux state
+    dispatch(getAdminProducts({
+      page,
+      size,
+      sortBy,
+      sortOrder,
+      search,
+      category: filters.category,
+      isActive: filters.isActive,
+      isFeatured: filters.isFeatured
+    }));
+  }, [dispatch, page, size, sortBy, sortOrder, search, filters]);
+
+  // Load categories once
+  useEffect(() => {
+    dispatch(getAdminCategories({ size: 100, includeInactive: false }));
   }, [dispatch]);
+
+  // Handle search input change
+  useEffect(() => {
+    debouncedSearch(localSearch);
+  }, [localSearch, debouncedSearch]);
 
   const getCategoryName = (categoryId: string | { _id: string; name: string; slug: string } | undefined) => {
     if (!categoryId) return 'No Category';
@@ -75,6 +138,17 @@ export default function AdminProductsPage() {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         await dispatch(deleteAdminProduct(productId)).unwrap();
+        // Refresh data after deletion
+        dispatch(getAdminProducts({
+          page,
+          size,
+          sortBy,
+          sortOrder,
+          search,
+          category: filters.category,
+          isActive: filters.isActive,
+          isFeatured: filters.isFeatured
+        }));
       } catch (error) {
         console.error('Error deleting product:', error);
       }
@@ -82,11 +156,70 @@ export default function AdminProductsPage() {
   };
 
   const handleModalSuccess = () => {
-    dispatch(getAdminProducts({ page: 1, limit: 50, sortBy: 'createdAt', sortOrder: 'desc' }));
+    // Refresh products after modal success
+    dispatch(getAdminProducts({
+      page,
+      size,
+      sortBy,
+      sortOrder,
+      search,
+      category: filters.category,
+      isActive: filters.isActive,
+      isFeatured: filters.isFeatured
+    }));
   };
 
   const handleRefresh = () => {
-    dispatch(getAdminProducts({ page: 1, limit: 50, sortBy: 'createdAt', sortOrder: 'desc' }));
+    dispatch(getAdminProducts({
+      page,
+      size,
+      sortBy,
+      sortOrder,
+      search,
+      category: filters.category,
+      isActive: filters.isActive,
+      isFeatured: filters.isFeatured
+    }));
+  };
+
+  // Pagination handlers
+  const handlePageChange = (newPage: number) => {
+    dispatch(setPage(newPage));
+  };
+
+  const handleSizeChange = (newSize: number) => {
+    dispatch(setSize(newSize));
+    dispatch(setPage(1)); // Reset to first page when changing size
+  };
+
+  // Sort handlers
+  const handleSort = (field: 'createdAt' | 'name' | 'price') => {
+    if (sortBy === field) {
+      // Toggle sort order if same field
+      dispatch(setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'));
+    } else {
+      // New field, default to desc
+      dispatch(setSortBy(field));
+      dispatch(setSortOrder('desc'));
+    }
+    dispatch(setPage(1)); // Reset to first page on sort change
+  };
+
+  // Filter handlers
+  const handleCategoryFilter = (category: string) => {
+    setCategoryFilter(category);
+    dispatch(setAdminProductsFilters({
+      category: category === 'all' ? undefined : category
+    }));
+    dispatch(setPage(1)); // Reset to first page on filter change
+  };
+
+  const handleStatusFilter = (status: string) => {
+    setStatusFilter(status);
+    const isActive = status === 'active' ? true : 
+                    status === 'inactive' ? false : undefined;
+    dispatch(setAdminProductsFilters({ isActive }));
+    dispatch(setPage(1)); // Reset to first page on filter change
   };
 
   const toggleProductSelection = (productId: string) => {
@@ -105,24 +238,9 @@ export default function AdminProductsPage() {
     }
   };
 
-  // Filter products based on search and filters
-  const filteredProducts = products?.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.sku.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = categoryFilter === 'all' || 
-                           getCategoryName(product.category).toLowerCase() === categoryFilter.toLowerCase();
-    
-    const matchesStatus = statusFilter === 'all' ||
-                         (statusFilter === 'active' && product.isActive) ||
-                         (statusFilter === 'inactive' && !product.isActive);
-    
-    return matchesSearch && matchesCategory && matchesStatus;
-  }) || [];
-
   // Calculate stats
   const stats = {
-    total: products?.length || 0,
+    total: totalElements,
     active: products?.filter(p => p.isActive).length || 0,
     inactive: products?.filter(p => !p.isActive).length || 0,
     categories: [...new Set(products?.map(p => getCategoryName(p.category)))].length || 0
@@ -271,8 +389,8 @@ export default function AdminProductsPage() {
               <input
                 type="text"
                 placeholder="📎 Search products, SKU..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 border-2 border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-slate-50 hover:bg-white"
               />
             </div>
@@ -330,7 +448,7 @@ export default function AdminProductsPage() {
             <div className="flex items-center space-x-2">
               <Package className="h-5 w-5 text-slate-600" />
               <h3 className="text-base font-bold text-slate-700">
-                📦 Products Catalog ({filteredProducts.length})
+                📦 Products Catalog ({products?.length || 0} of {totalElements})
               </h3>
             </div>
             {productsLoading && (
@@ -349,7 +467,7 @@ export default function AdminProductsPage() {
                 <th className="px-4 py-3 text-left">
                   <input
                     type="checkbox"
-                    checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
+                    checked={selectedProducts.length === products?.length && products && products.length > 0}
                     onChange={selectAllProducts}
                     className="rounded border-slate-300 text-slate-600 shadow-sm focus:border-slate-300 focus:ring focus:ring-slate-200"
                   />
@@ -404,8 +522,8 @@ export default function AdminProductsPage() {
                     </td>
                   </tr>
                 ))
-              ) : filteredProducts.length > 0 ? (
-                filteredProducts.map((product) => (
+              ) : products && products.length > 0 ? (
+                products.map((product: any) => (
                   <tr key={product._id} className="hover:bg-gradient-to-r hover:from-slate-50 hover:to-blue-50 transition-all duration-300">
                     <td className="px-4 py-3">
                       <input
@@ -522,6 +640,83 @@ export default function AdminProductsPage() {
             </tbody>
           </table>
         </div>
+        
+        {/* Enhanced Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-4 border-t border-slate-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+              <div className="flex items-center space-x-2 text-sm text-slate-600">
+                <span>
+                  Showing {((page - 1) * size) + 1} to {Math.min(page * size, totalElements)} of {totalElements} products
+                </span>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                {/* Page size selector */}
+                <div className="flex items-center space-x-2 text-sm">
+                  <span className="text-slate-600">Show:</span>
+                  <select
+                    value={size}
+                    onChange={(e) => handleSizeChange(Number(e.target.value))}
+                    className="px-2 py-1 border border-slate-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                </div>
+                
+                {/* Page navigation */}
+                <div className="flex items-center space-x-1">
+                  <button
+                    onClick={() => handlePageChange(Math.max(1, page - 1))}
+                    disabled={page <= 1}
+                    className="px-3 py-1 text-sm border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  
+                  {/* Page numbers */}
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (page <= 3) {
+                      pageNum = i + 1;
+                    } else if (page >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = page - 2 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`px-3 py-1 text-sm border rounded ${
+                          page === pageNum
+                            ? 'bg-blue-500 text-white border-blue-500'
+                            : 'border-slate-200 hover:bg-slate-50'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                  
+                  <button
+                    onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
+                    disabled={page >= totalPages}
+                    className="px-3 py-1 text-sm border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <ProductModal

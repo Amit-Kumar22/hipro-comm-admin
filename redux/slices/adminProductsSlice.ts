@@ -68,19 +68,19 @@ interface AdminProductsState {
   currentProduct: AdminProduct | null;
   loading: boolean;
   error: string | null;
-  pagination: {
-    totalCount: number;
-    totalPages: number;
-    currentPage: number;
-    hasNext: boolean;
-    hasPrev: boolean;
-    limit: number;
-  };
+  
+  // Standardized pagination and search state
+  page: number;
+  size: number;
+  totalPages: number;
+  totalElements: number;
+  sortBy: 'createdAt' | 'name' | 'price';
+  sortOrder: 'asc' | 'desc';
+  search: string;
+  
+  // Filters
   filters: {
     category?: string;
-    search?: string;
-    sortBy: 'createdAt' | 'name' | 'price';
-    sortOrder: 'asc' | 'desc';
     isActive?: boolean;
     isFeatured?: boolean;
   };
@@ -92,18 +92,18 @@ const initialState: AdminProductsState = {
   currentProduct: null,
   loading: false,
   error: null,
-  pagination: {
-    totalCount: 0,
-    totalPages: 0,
-    currentPage: 1,
-    hasNext: false,
-    hasPrev: false,
-    limit: 10,
-  },
-  filters: {
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
-  },
+  
+  // Standardized pagination and search state
+  page: 1,
+  size: 10,
+  totalPages: 0,
+  totalElements: 0,
+  sortBy: 'createdAt',
+  sortOrder: 'desc',
+  search: '',
+  
+  // Filters
+  filters: {},
 };
 
 // Admin Get Products
@@ -111,7 +111,7 @@ export const getAdminProducts = createAsyncThunk(
   'adminProducts/getProducts',
   async (params: {
     page?: number;
-    limit?: number;
+    size?: number;
     category?: string;
     search?: string;
     sortBy?: 'createdAt' | 'name' | 'price';
@@ -122,12 +122,15 @@ export const getAdminProducts = createAsyncThunk(
     try {
       const queryParams = new URLSearchParams();
       
+      // Standardized pagination params
       if (params.page) queryParams.append('page', params.page.toString());
-      if (params.limit) queryParams.append('limit', params.limit.toString());
-      if (params.category) queryParams.append('category', params.category);
-      if (params.search) queryParams.append('search', params.search);
+      if (params.size) queryParams.append('size', params.size.toString());
       if (params.sortBy) queryParams.append('sortBy', params.sortBy);
       if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+      if (params.search) queryParams.append('search', params.search);
+      
+      // Product-specific filters
+      if (params.category) queryParams.append('category', params.category);
       if (params.isActive !== undefined) queryParams.append('isActive', params.isActive.toString());
       if (params.isFeatured !== undefined) queryParams.append('isFeatured', params.isFeatured.toString());
 
@@ -136,7 +139,7 @@ export const getAdminProducts = createAsyncThunk(
         { headers: getAdminAuthHeaders() }
       );
 
-      return response.data.data;
+      return response.data;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to fetch products';
       return rejectWithValue(errorMessage);
@@ -238,6 +241,30 @@ const adminProductsSlice = createSlice({
     clearCurrentAdminProduct: (state) => {
       state.currentProduct = null;
     },
+    
+    // Standardized pagination and search actions
+    setPage: (state, action) => {
+      state.page = action.payload;
+    },
+    setSize: (state, action) => {
+      state.size = action.payload;
+    },
+    setSortBy: (state, action) => {
+      state.sortBy = action.payload;
+    },
+    setSortOrder: (state, action) => {
+      state.sortOrder = action.payload;
+    },
+    setSearch: (state, action) => {
+      state.search = action.payload;
+    },
+    
+    // Reset to initial state
+    resetProductsState: (state) => {
+      state.page = 1;
+      state.search = '';
+      state.filters = {};
+    },
   },
   extraReducers: (builder) => {
     // Get Admin Products
@@ -248,8 +275,15 @@ const adminProductsSlice = createSlice({
       })
       .addCase(getAdminProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload.products || [];
-        state.pagination = action.payload.pagination || initialState.pagination;
+        state.products = action.payload.data || [];
+        
+        // Update standardized pagination state
+        if (action.payload.pageable) {
+          state.page = action.payload.pageable.page;
+          state.size = action.payload.pageable.size;
+          state.totalPages = action.payload.pageable.totalPages;
+          state.totalElements = action.payload.pageable.totalElements;
+        }
       })
       .addCase(getAdminProducts.rejected, (state, action) => {
         state.loading = false;
@@ -280,7 +314,7 @@ const adminProductsSlice = createSlice({
       .addCase(createAdminProduct.fulfilled, (state, action) => {
         state.loading = false;
         state.products.unshift(action.payload);
-        state.pagination.totalCount += 1;
+        state.totalElements += 1;
       })
       .addCase(createAdminProduct.rejected, (state, action) => {
         state.loading = false;
@@ -317,7 +351,7 @@ const adminProductsSlice = createSlice({
       .addCase(deleteAdminProduct.fulfilled, (state, action) => {
         state.loading = false;
         state.products = state.products.filter(p => p._id !== action.payload);
-        state.pagination.totalCount -= 1;
+        state.totalElements = Math.max(0, state.totalElements - 1);
         if (state.currentProduct?._id === action.payload) {
           state.currentProduct = null;
         }
@@ -332,7 +366,13 @@ const adminProductsSlice = createSlice({
 export const { 
   clearAdminProductsError, 
   setAdminProductsFilters, 
-  clearCurrentAdminProduct 
+  clearCurrentAdminProduct,
+  setPage,
+  setSize,
+  setSortBy,
+  setSortOrder,
+  setSearch,
+  resetProductsState
 } = adminProductsSlice.actions;
 
 export default adminProductsSlice.reducer;
