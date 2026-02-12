@@ -3,8 +3,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { 
-  getAdminProducts, 
-  deleteAdminProduct,
   setPage,
   setSize,
   setSortBy,
@@ -13,7 +11,30 @@ import {
   setAdminProductsFilters
 } from '@/redux/slices/adminProductsSlice';
 import { getAdminCategories } from '@/redux/slices/adminCategoriesSlice';
+import { useToast } from '@/components/providers/ToastProvider';
 import ProductModal from '@/components/modals/ProductModal';
+
+// Import RTK Query hooks for immediate updates
+import {
+  useGetAdminProductsQuery,
+  useDeleteAdminProductMutation,
+} from '@/redux/api/adminProductsApi';
+
+// Define Product type interface for TypeScript
+interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  category: string;
+  price: number;
+  stock: number;
+  isActive: boolean;
+  isFeatured: boolean;
+  images: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 import { 
   Package, 
   Search, 
@@ -43,21 +64,45 @@ import {
 
 export default function AdminProductsPage() {
   const dispatch = useAppDispatch();
+  const { showSuccess, showError } = useToast();
   
-  // Get standardized state from Redux
+  // Get standardized state from Redux (for filters and pagination)
   const { 
-    products, 
-    loading: productsLoading, 
-    error: productsError,
     page,
     size,
-    totalPages,
-    totalElements,
     sortBy,
     sortOrder,
     search,
     filters
-  } = useAppSelector((state) => state.adminProducts);
+  } = useAppSelector(state => state.adminProducts);
+
+  // RTK Query for immediate data updates - NO MORE MANUAL REFETCHING NEEDED!
+  const {
+    data: productsData,
+    isLoading,
+    error: productsError,
+    refetch
+  } = useGetAdminProductsQuery({
+    page,
+    size,
+    sortBy,
+    sortOrder,
+    search: search || undefined,
+    category: filters.category,
+    isActive: filters.isActive,
+    isFeatured: filters.isFeatured
+  });
+
+  // RTK Query mutation for immediate delete with UI update
+  const [deleteProduct, { 
+    isLoading: isDeleting 
+  }] = useDeleteAdminProductMutation();
+
+  // Extract data from RTK Query response
+  const products = productsData?.data || [];
+  const totalPages = productsData?.pageable?.totalPages || 0;
+  const totalElements = productsData?.pageable?.totalElements || 0;
+  const loading = isLoading;
   
   const { categories } = useAppSelector((state) => state.adminCategories);
 
@@ -72,7 +117,7 @@ export default function AdminProductsPage() {
   const [categoryFilter, setCategoryFilter] = useState(filters.category || 'all');
   const [statusFilter, setStatusFilter] = useState(
     filters.isActive === true ? 'active' :
-    filters.isActive === false ? 'inactive' : 'all'
+    filters.isActive === false ? 'inactive' : 'active' // Default to 'active' instead of 'all'
   );
 
   // Debounced search function
@@ -90,25 +135,20 @@ export default function AdminProductsPage() {
     [dispatch]
   );
 
-  // Load data effect
-  useEffect(() => {
-    // Load products with current Redux state
-    dispatch(getAdminProducts({
-      page,
-      size,
-      sortBy,
-      sortOrder,
-      search,
-      category: filters.category,
-      isActive: filters.isActive,
-      isFeatured: filters.isFeatured
-    }));
-  }, [dispatch, page, size, sortBy, sortOrder, search, filters]);
+  // Load data effect - RTK Query handles data fetching automatically
+  // No manual getAdminProducts call needed - RTK Query refetches when params change
 
   // Load categories once
   useEffect(() => {
     dispatch(getAdminCategories({ size: 100, includeInactive: false }));
   }, [dispatch]);
+
+  // Set default filter to show only active products on mount
+  useEffect(() => {
+    if (!filters.hasOwnProperty('isActive')) {
+      dispatch(setAdminProductsFilters({ isActive: true }));
+    }
+  }, [dispatch, filters]);
 
   // Handle search input change
   useEffect(() => {
@@ -135,51 +175,37 @@ export default function AdminProductsPage() {
   };
 
   const handleDeleteProduct = async (productId: string) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
+    if (window.confirm('Are you sure you want to move this product to Delete History? You can restore it later or delete it permanently.')) {
       try {
-        await dispatch(deleteAdminProduct(productId)).unwrap();
-        // Refresh data after deletion
-        dispatch(getAdminProducts({
-          page,
-          size,
-          sortBy,
-          sortOrder,
-          search,
-          category: filters.category,
-          isActive: filters.isActive,
-          isFeatured: filters.isFeatured
-        }));
-      } catch (error) {
-        console.error('Error deleting product:', error);
+        const result = await deleteProduct(productId).unwrap();
+        
+        console.log('📦 Soft delete result:', result);
+        
+        if (result.data?.action === 'soft_delete') {
+          showSuccess('✅ Product moved to Delete History successfully!');
+        } else {
+          showSuccess('✅ Product deleted successfully!');
+        }
+        
+        // RTK Query automatically invalidates cache and updates UI!
+        console.log('🚀 IMMEDIATE UI UPDATE: Product removed from list');
+      } catch (error: any) {
+        console.error('❌ Error deleting product:', error);
+        showError(error?.message || error?.data?.message || 'Failed to delete product');
       }
     }
   };
 
   const handleModalSuccess = () => {
-    // Refresh products after modal success
-    dispatch(getAdminProducts({
-      page,
-      size,
-      sortBy,
-      sortOrder,
-      search,
-      category: filters.category,
-      isActive: filters.isActive,
-      isFeatured: filters.isFeatured
-    }));
+    // FORCE refetch to ensure UI updates with latest data
+    refetch();
+    console.log('🔄 FORCED refetch after modal success - UI will update with latest data');
   };
 
   const handleRefresh = () => {
-    dispatch(getAdminProducts({
-      page,
-      size,
-      sortBy,
-      sortOrder,
-      search,
-      category: filters.category,
-      isActive: filters.isActive,
-      isFeatured: filters.isFeatured
-    }));
+    // Trigger refetch with current filters
+    refetch();
+    console.log('🔄 Refreshing products with current filters');
   };
 
   // Pagination handlers
@@ -234,16 +260,16 @@ export default function AdminProductsPage() {
     if (selectedProducts.length === products?.length) {
       setSelectedProducts([]);
     } else {
-      setSelectedProducts(products?.map(product => product._id) || []);
+      setSelectedProducts(products?.map((product: Product) => product._id) || []);
     }
   };
 
   // Calculate stats
   const stats = {
     total: totalElements,
-    active: products?.filter(p => p.isActive).length || 0,
-    inactive: products?.filter(p => !p.isActive).length || 0,
-    categories: [...new Set(products?.map(p => getCategoryName(p.category)))].length || 0
+    active: products?.filter((p: Product) => p.isActive).length || 0,
+    inactive: products?.filter((p: Product) => !p.isActive).length || 0,
+    categories: [...new Set(products?.map((p: Product) => getCategoryName(p.category)))].length || 0
   };
 
   if (productsError) {
@@ -397,7 +423,7 @@ export default function AdminProductsPage() {
             
             <select
               value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
+              onChange={(e) => handleCategoryFilter(e.target.value)}
               className="px-3 py-2 border-2 border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-slate-50 hover:bg-white"
             >
               <option value="all">🏷️ All Categories</option>
@@ -410,7 +436,7 @@ export default function AdminProductsPage() {
 
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => handleStatusFilter(e.target.value)}
               className="px-3 py-2 border-2 border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-slate-50 hover:bg-white"
             >
               <option value="all">📊 All Status</option>
@@ -451,7 +477,7 @@ export default function AdminProductsPage() {
                 📦 Products Catalog ({products?.length || 0} of {totalElements})
               </h3>
             </div>
-            {productsLoading && (
+            {loading && (
               <div className="flex items-center text-sm text-slate-600 bg-slate-50 px-3 py-1 rounded-lg">
                 <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-slate-600 mr-2"></div>
                 <span>Loading...</span>
@@ -490,7 +516,7 @@ export default function AdminProductsPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {productsLoading ? (
+              {loading ? (
                 Array(5).fill(0).map((_, i) => (
                   <tr key={i} className="hover:bg-gray-50">
                     <td className="px-4 py-3">

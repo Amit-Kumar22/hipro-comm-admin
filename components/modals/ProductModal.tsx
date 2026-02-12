@@ -2,10 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { createAdminProduct, updateAdminProduct } from '@/redux/slices/adminProductsSlice';
 import { getAdminCategories } from '@/redux/slices/adminCategoriesSlice';
 import { getInventory } from '@/redux/slices/inventorySlice';
 import { useToast } from '@/components/providers/ToastProvider';
+
+// Import RTK Query hooks for immediate updates
+import {
+  useCreateAdminProductMutation,
+  useUpdateAdminProductMutation,
+} from '@/redux/api/adminProductsApi';
+
 import Modal from './Modal';
 import ImageUpload from '../ui/ImageUpload';
 import VideoUpload from '../ui/VideoUpload';
@@ -69,8 +75,13 @@ interface ProductFormData {
 export default function ProductModal({ isOpen, onClose, product, onSuccess }: ProductModalProps) {
   const dispatch = useAppDispatch();
   const { showSuccess, showError } = useToast();
-  const { loading: productLoading } = useAppSelector((state) => state.adminProducts);
+  
+  // RTK Query mutations for immediate UI updates
+  const [createProduct, { isLoading: isCreating }] = useCreateAdminProductMutation();
+  const [updateProduct, { isLoading: isUpdating }] = useUpdateAdminProductMutation();
+  
   const { categories, loading: categoriesLoading } = useAppSelector((state) => state.adminCategories);
+  const productLoading = isCreating || isUpdating;
 
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
@@ -521,29 +532,33 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
       let result;
       if (product) {
         console.log('📝 Updating existing product:', product._id);
-        result = await dispatch(updateAdminProduct({ 
+        result = await updateProduct({ 
           productId: product._id, 
           productData: finalProductData 
-        })).unwrap();
-        showSuccess('Product updated successfully! Stock and inventory updated automatically.');
+        }).unwrap();
+        showSuccess('✅ Product updated successfully! UI updated immediately!');
       } else {
         console.log('🆕 Creating new product');
-        result = await dispatch(createAdminProduct(finalProductData)).unwrap();
+        result = await createProduct(finalProductData).unwrap();
         const stockQuantity = typeof formData.inventory.quantity === 'string' ? parseInt(formData.inventory.quantity) || 0 : formData.inventory.quantity;
         if (stockQuantity === 0) {
-          showSuccess('Product created successfully! Product is marked as "Out of Stock" in inventory.');
+          showSuccess('✅ Product created successfully! Product is marked as "Out of Stock" in inventory.');
         } else {
-          showSuccess('Product created successfully! Inventory record created with initial stock.');
+          showSuccess('✅ Product created successfully! Inventory record created with initial stock.');
         }
       }
       
-      // Refresh inventory data to show updated stock levels
-      dispatch(getInventory({}));
+      // RTK Query automatically invalidates cache and updates UI immediately!
+      // FORCE additional refetch to ensure UI updates
+      if (onSuccess) {
+        onSuccess(); // This triggers refetch in parent component
+      }
+      
+      console.log('🚀 IMMEDIATE UI UPDATE: RTK Query + Manual refetch triggered');
       
       console.log('✅ Product save successful, closing modal');
       console.log('🎯 API Result:', result);
       console.log('🚀 Calling onSuccess and onClose now...');
-      onSuccess?.();
       onClose(); // Only close on success
       console.log('✅ Modal close called successfully');
     } catch (error: any) {

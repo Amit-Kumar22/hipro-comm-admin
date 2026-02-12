@@ -8,6 +8,9 @@ import adminOrdersReducer from './slices/adminOrdersSlice';
 import adminReducer from './slices/adminSlice';
 import paymentVerificationReducer from './slices/paymentVerificationSlice';
 
+// Import RTK Query API for immediate updates
+import { adminProductsApi } from './api/adminProductsApi';
+
 export const store = configureStore({
   reducer: {
     adminAuth: adminAuthReducer,
@@ -18,6 +21,9 @@ export const store = configureStore({
     adminOrders: adminOrdersReducer,
     admin: adminReducer,
     paymentVerification: paymentVerificationReducer,
+    
+    // Add RTK Query API reducer for automatic cache management
+    [adminProductsApi.reducerPath]: adminProductsApi.reducer,
   },
   devTools: process.env.NODE_ENV !== 'production',
   middleware: (getDefaultMiddleware) =>
@@ -25,7 +31,9 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: ['persist/PERSIST'],
       },
-    }),
+    })
+    // Add RTK Query middleware for automatic cache invalidation
+    .concat(adminProductsApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

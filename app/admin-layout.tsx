@@ -76,6 +76,7 @@ export default function AdminLayout({
     { name: 'Dashboard', href: '/', icon: '📊' },
     { name: 'Users', href: '/users', icon: '👥' },
     { name: 'Products', href: '/products', icon: '📦' },
+    { name: 'Delete History', href: '/products/delete-history', icon: '🗑️' },
     { name: 'Categories', href: '/categories', icon: '📂' },
     { name: 'Stock', href: '/stock', icon: '📋' },
     { name: 'Orders', href: '/orders', icon: '🛒' },

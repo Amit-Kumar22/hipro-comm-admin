@@ -60,13 +60,16 @@ export interface AdminProduct {
   }>;
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string;
 }
 
 interface AdminProductsState {
   products: AdminProduct[];
   featuredProducts: AdminProduct[];
+  deletedProducts: AdminProduct[]; // For Delete History
   currentProduct: AdminProduct | null;
   loading: boolean;
+  deletedLoading: boolean; // Loading state for deleted products
   error: string | null;
   
   // Standardized pagination and search state
@@ -77,6 +80,14 @@ interface AdminProductsState {
   sortBy: 'createdAt' | 'name' | 'price';
   sortOrder: 'asc' | 'desc';
   search: string;
+  
+  // Delete History Pagination
+  deletedPagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
   
   // Filters
   filters: {
@@ -89,8 +100,10 @@ interface AdminProductsState {
 const initialState: AdminProductsState = {
   products: [],
   featuredProducts: [],
+  deletedProducts: [], // Initialize deleted products array
   currentProduct: null,
   loading: false,
+  deletedLoading: false, // Initialize deleted loading state
   error: null,
   
   // Standardized pagination and search state
@@ -102,8 +115,16 @@ const initialState: AdminProductsState = {
   sortOrder: 'desc',
   search: '',
   
-  // Filters
-  filters: {},
+  // Delete History Pagination
+  deletedPagination: {
+    page: 1,
+    limit: 10,
+    total: 0,
+    pages: 0
+  },
+  
+  // Filters - Default to show only active products
+  filters: { isActive: true },
 };
 
 // Admin Get Products
@@ -211,18 +232,100 @@ export const updateAdminProduct = createAsyncThunk(
   }
 );
 
-// Admin Delete Product
+// Admin Delete Product (SOFT DELETE - moves to Delete History)
 export const deleteAdminProduct = createAsyncThunk(
   'adminProducts/deleteProduct',
   async (productId: string, { rejectWithValue }) => {
     try {
-      await axios.delete(
-        `${API_BASE_URL}/products/${productId}`,
+      const response = await axios.delete(
+        `${API_BASE_URL}/products/${productId}`,  // No ?permanent=true, so SOFT DELETE
         { headers: getAdminAuthHeaders() }
       );
-      return productId;
+      
+      console.log('🚀 SOFT DELETE SUCCESS:', response.data);
+      
+      // Return the response data which includes productId, deletedPermanently, and action
+      return {
+        productId,
+        ...response.data.data
+      };
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to delete product';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Get Deleted Products for Delete History page
+export const getDeletedProducts = createAsyncThunk(
+  'adminProducts/getDeletedProducts',
+  async (params: {
+    page?: number;
+    limit?: number;
+  } = {}, { rejectWithValue }) => {
+    try {
+      const queryParams = new URLSearchParams();
+      
+      if (params.page) queryParams.append('page', params.page.toString());
+      if (params.limit) queryParams.append('limit', params.limit.toString());
+
+      const response = await axios.get(
+        `${API_BASE_URL}/products/deleted?${queryParams.toString()}`,
+        { headers: getAdminAuthHeaders() }
+      );
+
+      console.log('🗂️ DELETED PRODUCTS LOADED:', response.data.data.products.length);
+      
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Failed to fetch deleted products';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Permanently Delete Product (from Delete History)
+export const permanentDeleteProduct = createAsyncThunk(
+  'adminProducts/permanentDeleteProduct',
+  async (productId: string, { rejectWithValue }) => {
+    try {
+      const response = await axios.delete(
+        `${API_BASE_URL}/products/${productId}?permanent=true`,  // permanent=true for HARD DELETE
+        { headers: getAdminAuthHeaders() }
+      );
+      
+      console.log('🗑️ PERMANENT DELETE SUCCESS:', response.data);
+      
+      return {
+        productId,
+        ...response.data.data
+      };
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Failed to permanently delete product';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Restore Product from Delete History
+export const restoreProduct = createAsyncThunk(
+  'adminProducts/restoreProduct',
+  async (productId: string, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/products/${productId}/restore`,
+        {},
+        { headers: getAdminAuthHeaders() }
+      );
+      
+      console.log('♻️ RESTORE SUCCESS:', response.data);
+      
+      return {
+        productId,
+        ...response.data.data
+      };
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Failed to restore product';
       return rejectWithValue(errorMessage);
     }
   }
@@ -342,7 +445,7 @@ const adminProductsSlice = createSlice({
         state.error = action.payload as string;
       });
 
-    // Delete Admin Product
+    // Delete Admin Product (SOFT DELETE)
     builder
       .addCase(deleteAdminProduct.pending, (state) => {
         state.loading = true;
@@ -350,14 +453,95 @@ const adminProductsSlice = createSlice({
       })
       .addCase(deleteAdminProduct.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = state.products.filter(p => p._id !== action.payload);
-        state.totalElements = Math.max(0, state.totalElements - 1);
-        if (state.currentProduct?._id === action.payload) {
+        
+        const { productId, action: deleteAction } = action.payload;
+        
+        if (deleteAction === 'soft_delete') {
+          // Soft delete - REMOVE from active products list (since it's now in delete history)
+          state.products = state.products.filter(p => p._id !== productId);
+          state.totalElements = Math.max(0, state.totalElements - 1);
+          
+          console.log(`📦 Product SOFT DELETED (moved to Delete History): ${productId}`);
+        }
+        
+        // Clear current product if it was the deleted one
+        if (state.currentProduct?._id === productId) {
           state.currentProduct = null;
         }
       })
       .addCase(deleteAdminProduct.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Get Deleted Products
+    builder
+      .addCase(getDeletedProducts.pending, (state) => {
+        state.deletedLoading = true;
+        state.error = null;
+      })
+      .addCase(getDeletedProducts.fulfilled, (state, action) => {
+        state.deletedLoading = false;
+        state.deletedProducts = action.payload.data.products || [];
+        state.deletedPagination = action.payload.data.pagination || {
+          page: 1,
+          limit: 10,
+          total: 0,
+          pages: 0
+        };
+        
+        console.log(`🗂️ Loaded ${state.deletedProducts.length} deleted products`);
+      })
+      .addCase(getDeletedProducts.rejected, (state, action) => {
+        state.deletedLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Permanent Delete Product
+    builder
+      .addCase(permanentDeleteProduct.pending, (state) => {
+        state.deletedLoading = true;
+        state.error = null;
+      })
+      .addCase(permanentDeleteProduct.fulfilled, (state, action) => {
+        state.deletedLoading = false;
+        
+        const { productId, deletedPermanently } = action.payload;
+        
+        if (deletedPermanently) {
+          // Remove from deleted products list
+          state.deletedProducts = state.deletedProducts.filter(p => p._id !== productId);
+          state.deletedPagination.total = Math.max(0, state.deletedPagination.total - 1);
+          
+          console.log(`🗑️ Product PERMANENTLY DELETED: ${productId}`);
+        }
+      })
+      .addCase(permanentDeleteProduct.rejected, (state, action) => {
+        state.deletedLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Restore Product
+    builder
+      .addCase(restoreProduct.pending, (state) => {
+        state.deletedLoading = true;
+        state.error = null;
+      })
+      .addCase(restoreProduct.fulfilled, (state, action) => {
+        state.deletedLoading = false;
+        
+        const { productId, restored } = action.payload;
+        
+        if (restored) {
+          // Remove from deleted products list (it's now back in active products)
+          state.deletedProducts = state.deletedProducts.filter(p => p._id !== productId);
+          state.deletedPagination.total = Math.max(0, state.deletedPagination.total - 1);
+          
+          console.log(`♻️ Product RESTORED: ${productId}`);
+        }
+      })
+      .addCase(restoreProduct.rejected, (state, action) => {
+        state.deletedLoading = false;
         state.error = action.payload as string;
       });
   },
