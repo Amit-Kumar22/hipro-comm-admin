@@ -154,6 +154,42 @@ export const registerAdmin = createAsyncThunk(
   }
 );
 
+// Admin Google OAuth Login/Register
+export const googleAuthAdmin = createAsyncThunk(
+  'adminAuth/googleAuthAdmin',
+  async (idToken: string, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/auth/google`, 
+        { 
+          idToken,
+          role: 'admin' // Force admin role for admin portal
+        }, 
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const { user, token } = response.data.data as AdminAuthResponse;
+      
+      // Verify admin role
+      if (user.role !== 'admin') {
+        throw new Error('Access denied. Admin privileges required.');
+      }
+      
+      // Store in localStorage with admin-specific keys
+      setAdminToken(token);
+      setAdminUserData(user);
+      
+      return { user, token };
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Google admin authentication failed';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 // Get Admin Profile
 export const getAdminProfile = createAsyncThunk(
   'adminAuth/getAdminProfile',
@@ -255,6 +291,27 @@ const adminAuthSlice = createSlice({
         state.error = null;
       })
       .addCase(loginAdmin.rejected, (state, action) => {
+        state.loading = false;
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+        state.error = action.payload as string;
+      });
+
+    // Google OAuth Admin
+    builder
+      .addCase(googleAuthAdmin.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(googleAuthAdmin.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.error = null;
+      })
+      .addCase(googleAuthAdmin.rejected, (state, action) => {
         state.loading = false;
         state.user = null;
         state.token = null;

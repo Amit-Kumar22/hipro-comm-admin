@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { loginAdmin, clearAdminCredentials, logoutAdmin } from '@/redux/slices/adminAuthSlice';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import GoogleOAuthButtonAdmin from './GoogleOAuthButtonAdmin';
 
 export default function AdminLoginForm() {
   const [email, setEmail] = useState('');
@@ -225,6 +226,22 @@ export default function AdminLoginForm() {
                 )}
               </button>
             </div>
+
+            {/* OAuth Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-600" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-slate-900 text-gray-400">Or continue with</span>
+              </div>
+            </div>
+
+            {/* Google OAuth Button */}
+            <GoogleOAuthButtonAdmin 
+              onSuccess={() => router.push('/')}
+              onError={(error) => console.error('Google admin login error:', error)}
+            />
 
             <div className="text-center">
               <p className="text-xs text-gray-400">
