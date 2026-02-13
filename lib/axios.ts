@@ -6,14 +6,22 @@
 import axios from 'axios';
 import config from './config';
 
-// Create axios instance with dynamic base URL
+// Create axios instance with dynamic base URL and production optimizations
 const axiosInstance = axios.create({
   baseURL: config.api.baseURL,
-  timeout: 10000,
+  timeout: config.isDevelopment ? 10000 : 30000, // Increased timeout for production
   withCredentials: true,
+  
+  // Production optimizations
+  ...(config.isProduction && {
+    headers: {
+      'Connection': 'keep-alive',
+      'Keep-Alive': 'timeout=5, max=1000'
+    }
+  })
 });
 
-// Request interceptor to add auth headers
+// Request interceptor to add auth headers and enhanced production handling
 axiosInstance.interceptors.request.use(
   (config) => {
     // Add auth token if available
@@ -21,6 +29,12 @@ axiosInstance.interceptors.request.use(
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    
+    // Production-specific headers for better CORS handling
+    if (process.env.NODE_ENV === 'production') {
+      config.headers['Content-Type'] = 'application/json';
+      config.headers['Accept'] = 'application/json';
     }
     
     return config;

@@ -59,11 +59,23 @@ export default function GoogleOAuthButtonAdmin({
   const handleCredentialResponse = useCallback(async (response: { credential: string }) => {
     try {
       const result = await dispatch(googleAuthAdmin(response.credential)).unwrap();
-      console.log('Google admin authentication successful:', result);
-      onSuccess?.();
+      
+      // Force a small delay to ensure token is properly set before navigation
+      setTimeout(() => {
+        onSuccess?.();
+      }, 100);
+      
     } catch (error) {
-      console.error('Google admin authentication failed:', error);
-      onError?.(error as string);
+      // Enhanced error handling for production
+      const errorMessage = typeof error === 'string' ? error : 
+                          (error as any)?.message || 'Admin Google authentication failed. Please try again.';
+      
+      // If it's a 404 error, provide more helpful message
+      if (errorMessage.includes('404') || errorMessage.includes('Not Found')) {
+        onError?.('Authentication service is temporarily unavailable. Please try again later or contact support.');
+      } else {
+        onError?.(errorMessage);
+      }
     }
   }, [dispatch, onSuccess, onError]);
 

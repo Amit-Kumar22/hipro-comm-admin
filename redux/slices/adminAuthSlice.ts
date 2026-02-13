@@ -162,18 +162,19 @@ export const googleAuthAdmin = createAsyncThunk(
       const response = await axios.post(`${API_BASE_URL}/auth/google`, 
         { 
           idToken,
-          role: 'admin' // Force admin role for admin portal
+          role: 'admin' // Explicitly set admin role
         }, 
         {
           headers: {
             'Content-Type': 'application/json',
           },
+          timeout: 15000, // Increased timeout for production
         }
       );
 
       const { user, token } = response.data.data as AdminAuthResponse;
       
-      // Verify admin role
+      // Verify admin role - this is critical for admin portal
       if (user.role !== 'admin') {
         throw new Error('Access denied. Admin privileges required.');
       }
@@ -184,7 +185,25 @@ export const googleAuthAdmin = createAsyncThunk(
       
       return { user, token };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Google admin authentication failed';
+      // Clear any existing admin auth data on failure
+      clearAdminAuthData();
+      
+      // Enhanced error handling
+      let errorMessage = 'Admin Google authentication failed';
+      
+      if (error.response) {
+        errorMessage = error.response.data?.message || error.response.data?.error || errorMessage;
+        
+        // Handle specific 404 error for missing endpoint
+        if (error.response.status === 404) {
+          errorMessage = 'Authentication service temporarily unavailable. Please try again later.';
+        }
+      } else if (error.request) {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      } else {
+        errorMessage = error.message || errorMessage;
+      }
+      
       return rejectWithValue(errorMessage);
     }
   }
