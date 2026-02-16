@@ -92,7 +92,7 @@ export default function AdminLoginForm() {
               </svg>
             </div>
             <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-              Access Denied
+              Access Denieds
             </h2>
             <p className="mt-2 text-center text-sm text-gray-300">
               You are not logged in as an admin user.
