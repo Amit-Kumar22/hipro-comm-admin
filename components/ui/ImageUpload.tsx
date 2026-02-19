@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { Upload, X, AlertTriangle, CheckCircle, Image as ImageIcon } from 'lucide-react';
+import { API_BASE_URL, getAdminToken } from '@/redux/config/api.config';
 
 interface ImageUploadProps {
   images: string[];
@@ -88,16 +89,44 @@ export default function ImageUpload({
     const updatedFiles = [...selectedFiles, ...newFiles];
     setSelectedFiles(updatedFiles);
 
-    // Convert valid files to base64 for form data
+    // Upload valid files to API and push returned URLs (avoid base64)
     const validFiles = newFiles.filter(f => f.isValid);
-    validFiles.forEach((imageFile) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const dataUrl = e.target?.result as string;
-        onImagesChange([...images, dataUrl]);
-      };
-      reader.readAsDataURL(imageFile.file);
-    });
+    if (validFiles.length > 0) {
+      validFiles.forEach(async (imageFile) => {
+        try {
+          const form = new FormData();
+          form.append('image', imageFile.file);
+
+          const token = getAdminToken();
+
+          const resp = await fetch(`${API_BASE_URL}/upload/image`, {
+            method: 'POST',
+            headers: {
+              ...(token ? { Authorization: `Bearer ${token}` } : {})
+            },
+            body: form,
+          });
+
+          if (!resp.ok) {
+            console.error('Image upload failed', await resp.text());
+            // fallback to local blob preview
+            onImagesChange([...images, imageFile.url]);
+            return;
+          }
+
+          const payload = await resp.json();
+          const uploadedUrl = payload?.data?.url || payload?.url;
+          if (uploadedUrl) {
+            onImagesChange([...images, uploadedUrl]);
+          } else {
+            onImagesChange([...images, imageFile.url]);
+          }
+        } catch (err) {
+          console.error('Upload error', err);
+          onImagesChange([...images, imageFile.url]);
+        }
+      });
+    }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
