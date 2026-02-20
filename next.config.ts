@@ -79,7 +79,24 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'localhost',
-      }
+      },
+      // Production API domain for uploaded images
+      {
+        protocol: 'https',
+        hostname: 'shop.hiprotech.org',
+      },
+      {
+        protocol: 'http',
+        hostname: 'shop.hiprotech.org',
+      },
+      {
+        protocol: 'https',
+        hostname: 'adminshop.hiprotech.org',
+      },
+      {
+        protocol: 'http',
+        hostname: 'adminshop.hiprotech.org',
+      },
     ],
   },
 };

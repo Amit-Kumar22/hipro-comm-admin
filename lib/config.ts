@@ -32,7 +32,7 @@ const config = {
   // Upload configuration
   upload: {
     maxSize: 10 * 1024 * 1024, // 10MB
-    allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'],
   },
 
   // API Request configuration
