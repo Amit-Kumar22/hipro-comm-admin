@@ -61,7 +61,7 @@ export default function ImageUpload({
     return { isValid: true };
   };
 
-  const processFiles = (files: FileList) => {
+  const processFiles = async (files: FileList) => {
     const fileArray = Array.from(files);
     const totalFiles = selectedFiles.length + fileArray.length + images.length; // Include existing images
 
@@ -89,16 +89,21 @@ export default function ImageUpload({
     const updatedFiles = [...selectedFiles, ...newFiles];
     setSelectedFiles(updatedFiles);
 
-    // Upload valid files to API and push returned URLs (avoid base64)
+    // Upload valid files to API and push returned URLs (avoid base64 and blob URLs in production)
     const validFiles = newFiles.filter(f => f.isValid);
     if (validFiles.length > 0) {
-      validFiles.forEach(async (imageFile) => {
+      // Process uploads sequentially to avoid race conditions
+      for (const imageFile of validFiles) {
         try {
           const form = new FormData();
           form.append('image', imageFile.file);
+          form.append('entityType', 'product'); // Specify entity type
+          form.append('alt', imageFile.name || 'Product image'); // Provide alt text
 
           const token = getAdminToken();
 
+          console.log(`📤 Uploading image: ${imageFile.name} to ${API_BASE_URL}/upload/image`);
+          
           const resp = await fetch(`${API_BASE_URL}/upload/image`, {
             method: 'POST',
             headers: {
@@ -108,24 +113,43 @@ export default function ImageUpload({
           });
 
           if (!resp.ok) {
-            console.error('Image upload failed', await resp.text());
-            // fallback to local blob preview
-            onImagesChange([...images, imageFile.url]);
-            return;
+            const errorText = await resp.text();
+            console.error('❌ Image upload failed:', errorText);
+            
+            // Show user-friendly error instead of fallback
+            alert(`Failed to upload ${imageFile.name}: ${resp.status} ${resp.statusText}\n\nPlease try again or contact support if the issue persists.`);
+            continue; // Skip this file, don't add blob URL
           }
 
           const payload = await resp.json();
+          console.log('📥 Upload response:', payload);
+          
           const uploadedUrl = payload?.data?.url || payload?.url;
-          if (uploadedUrl) {
-            onImagesChange([...images, uploadedUrl]);
-          } else {
-            onImagesChange([...images, imageFile.url]);
+          
+          if (!uploadedUrl) {
+            console.error('❌ No URL in response:', payload);
+            alert(`Upload succeeded but no URL returned for ${imageFile.name}. Please try again.`);
+            continue;
           }
+
+          // Validate the uploaded URL is accessible
+          if (!uploadedUrl.startsWith('http') && !uploadedUrl.startsWith('/')) {
+            console.error('❌ Invalid URL format:', uploadedUrl);
+            alert(`Invalid URL format returned for ${imageFile.name}. Please try again.`);
+            continue;
+          }
+
+          console.log(`✅ Image uploaded successfully: ${uploadedUrl}`);
+          
+          // Add the valid URL to the images array
+          onImagesChange([...images, uploadedUrl]);
+          
         } catch (err) {
-          console.error('Upload error', err);
-          onImagesChange([...images, imageFile.url]);
+          console.error('❌ Upload error:', err);
+          alert(`Network error uploading ${imageFile.name}. Please check your connection and try again.`);
+          // Do NOT add blob URL as fallback in production
         }
-      });
+      }
     }
   };
 
@@ -157,14 +181,16 @@ export default function ImageUpload({
   };
 
   const removeFile = (index: number) => {
+    // Remove from selectedFiles preview
     const fileToRemove = selectedFiles[index];
-    if (fileToRemove.url.startsWith('blob:')) {
+    if (fileToRemove && fileToRemove.url.startsWith('blob:')) {
       URL.revokeObjectURL(fileToRemove.url);
     }
     
     const updatedFiles = selectedFiles.filter((_, i) => i !== index);
     setSelectedFiles(updatedFiles);
     
+    // Remove from actual images array
     const updatedImages = images.filter((_, i) => i !== index);
     onImagesChange(updatedImages);
   };
