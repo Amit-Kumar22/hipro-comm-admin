@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { 
   setPage,
@@ -120,30 +120,8 @@ export default function AdminProductsPage() {
     filters.isActive === false ? 'inactive' : 'active' // Default to 'active' instead of 'all'
   );
 
-  // Debounced search function using useRef for timeout management
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  const debouncedSearch = useCallback(
-    (searchTerm: string) => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      timeoutRef.current = setTimeout(() => {
-        dispatch(setSearch(searchTerm));
-        dispatch(setPage(1)); // Reset to first page on search
-      }, 500);
-    },
-    [dispatch]
-  );
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
+  // Debounced search function
+  const debouncedSearch = useCallback(\n    (searchTerm: string) => {\n      const timeoutId = setTimeout(() => {\n        dispatch(setSearch(searchTerm));\n        dispatch(setPage(1));\n      }, 500);\n      return () => clearTimeout(timeoutId);\n    },\n    [dispatch]\n  );
 
   // Load data effect - RTK Query handles data fetching automatically
   // No manual getAdminProducts call needed - RTK Query refetches when params change
@@ -560,7 +538,7 @@ export default function AdminProductsPage() {
                 ))
               ) : products && products.length > 0 ? (
                 products.map((product: any) => (
-                  <tr key={product._id} className="hover:bg-gradient-to-r hover:50 hover:tofrom-slate--blue-50 transition-all duration-300">
+                  <tr key={product._id} className="hover:bg-gradient-to-r hover:from-slate-50 hover:to-blue-50 transition-all duration-300">
                     <td className="px-4 py-3">
                       <input
                         type="checkbox"
